@@ -5,23 +5,12 @@ interface TrainingStatsProps {
   runs: RunListItem[];
 }
 
-function isToday(isoString: string): boolean {
-  if (!isoString) return false;
-  const date = new Date(isoString);
-  const today = new Date();
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
-  );
-}
+
 
 export function TrainingStats({ runs }: TrainingStatsProps) {
   const activeCount = runs.filter((r) => r.status === 'running').length;
   const queuedCount = runs.filter((r) => r.status === 'queued').length;
-  const completedTodayCount = runs.filter(
-    (r) => r.status === 'completed' && isToday(r.updated_at || r.created_at)
-  ).length;
+  const completedCount = runs.filter((r) => r.status === 'completed').length;
   const failedCount = runs.filter((r) => r.status === 'failed').length;
 
   return (
@@ -71,7 +60,7 @@ export function TrainingStats({ runs }: TrainingStatsProps) {
       <div className="bg-surface border border-border rounded-xl p-5 relative overflow-hidden transition-all hover:border-accent-emerald/40">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            Completed Today
+            Completed Runs
           </span>
           <div className="w-8 h-8 rounded-lg bg-accent-emerald/10 flex items-center justify-center text-accent-emerald">
             <CheckCircle2 className="w-4 h-4" />
@@ -79,7 +68,7 @@ export function TrainingStats({ runs }: TrainingStatsProps) {
         </div>
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-bold font-mono text-text-primary tracking-tight">
-            {completedTodayCount}
+            {completedCount}
           </span>
           <span className="text-xs text-text-muted">successful executions</span>
         </div>
