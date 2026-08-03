@@ -49,7 +49,7 @@ docker-compose.override.yml
 # Migration scripts should be committed.
 
 # ─── Artifacts / Storage ─────────────────────────────────────────────────────
-artifacts/
+/artifacts/
 uploads/
 storage/*
 !storage/.gitkeep
