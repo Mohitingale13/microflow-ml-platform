@@ -25,9 +25,19 @@ const navItems: NavItem[] = [
   { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={18} /> },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
-    <aside className="sidebar">
+    <>
+      <div 
+        className={`sidebar-overlay ${isOpen ? "open" : ""}`} 
+        onClick={onClose} 
+      />
+      <aside className={`sidebar ${isOpen ? "open" : ""}`}>
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <span className="logo-icon">μ</span>
@@ -59,5 +69,6 @@ export function Sidebar() {
         <p className="sidebar-version">v1.0.0</p>
       </div>
     </aside>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useHealth } from "@/hooks/useHealth";
+import { Menu } from "lucide-react";
 
 const routeLabels: Record<string, string> = {
   "/": "Dashboard",
@@ -11,7 +12,11 @@ const routeLabels: Record<string, string> = {
   "/pipeline": "Pipeline",
 };
 
-export function Navbar() {
+interface NavbarProps {
+  onMenuToggle: () => void;
+}
+
+export function Navbar({ onMenuToggle }: NavbarProps) {
   const { pathname } = useLocation();
   const { data: health, isSuccess } = useHealth();
   const pageTitle = routeLabels[pathname] ?? "MicroFlow";
@@ -19,6 +24,9 @@ export function Navbar() {
   return (
     <header className="navbar">
       <div className="navbar-title">
+        <button className="mobile-menu-btn" onClick={onMenuToggle} aria-label="Toggle menu">
+          <Menu size={20} />
+        </button>
         <h1>{pageTitle}</h1>
       </div>
 

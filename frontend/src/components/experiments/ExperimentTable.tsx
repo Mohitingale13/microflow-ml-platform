@@ -32,7 +32,7 @@ export function ExperimentTable({ data, runCounts = {} }: ExperimentTableProps) 
   }
 
   return (
-    <div className="bg-surface border border-border rounded-lg overflow-hidden">
+    <div className="bg-surface border border-border rounded-lg overflow-hidden overflow-x-auto">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-surface-2 border-b border-border">
