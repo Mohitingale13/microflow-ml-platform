@@ -15,7 +15,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.experiment import Run, RunStatus
+from app.models.experiment import ExperimentStatus, Run, RunStatus
 from app.repositories.experiment_repository import ExperimentRepository
 from app.repositories.run_repository import RunRepository
 
@@ -73,6 +73,9 @@ class RunService:
         db: Session,
     ) -> Run:
         experiment = self._assert_experiment_exists(experiment_id, db)
+
+        if experiment.status == ExperimentStatus.draft:
+            self._experiment_repo.update(db, experiment, status=ExperimentStatus.active)
 
         # Inherit and merge configuration: experiment defaults ← run overrides
         merged_config = self._merge_configuration(
