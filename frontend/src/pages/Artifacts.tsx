@@ -185,7 +185,7 @@ export function Artifacts() {
               </div>
               <div>
                 <span className="text-xs font-medium text-text-muted uppercase tracking-wider block">
-                  Total Artifacts
+                  Registered Artifacts
                 </span>
                 <span className="text-2xl font-bold font-mono text-text-primary">
                   {totalCount}

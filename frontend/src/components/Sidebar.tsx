@@ -33,7 +33,7 @@ export function Sidebar() {
           <span className="logo-icon">μ</span>
           <span className="logo-text">MicroFlow</span>
         </div>
-        <p className="logo-tagline">AI Experimentation Platform for Computational Biology Workflows</p>
+        <p className="logo-tagline">Machine Learning Operations Platform</p>
       </div>
 
       <nav className="sidebar-nav">
@@ -56,7 +56,7 @@ export function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <p className="sidebar-version">v0.1.0</p>
+        <p className="sidebar-version">v1.0.0</p>
       </div>
     </aside>
   );

@@ -69,7 +69,7 @@ const CARDS: CardDef[] = [
     glow: '0 0 24px rgba(239,68,68,0.15)',
   },
   {
-    label: 'Artifacts',
+    label: 'Registered Artifacts',
     value: o => o.total_artifacts,
     sub: o => `${o.total_artifacts} stored files`,
     icon: <Archive size={20} />,
