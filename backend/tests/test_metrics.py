@@ -1,5 +1,5 @@
 """
-test_metrics.py — Comprehensive tests for Milestone 5 Metrics Dashboard backend.
+test_metrics.py — Comprehensive tests for Metrics Dashboard backend.
 
 Tests:
   - MetricsRepository: SQL aggregates, empty state, group-bys, filters

@@ -233,7 +233,7 @@ Metrics generated automatically.
 
 ---
 
-# Milestone 5
+# Phase 5
 
 ## Artifact Registry
 
@@ -273,7 +273,7 @@ Artifacts viewable from dashboard.
 
 ---
 
-# Milestone 6
+# Phase 6
 
 ## Dashboard
 
@@ -311,7 +311,7 @@ Dashboard complete.
 
 ---
 
-# Milestone 7
+# Phase 7
 
 ## Experiment Comparison
 
