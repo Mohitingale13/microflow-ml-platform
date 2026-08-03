@@ -145,7 +145,7 @@ export function Metrics() {
     selectedModelType !== 'all';
 
   return (
-    <div className="page space-y-6 pb-12">
+    <div className="page space-y-10 pb-12">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -194,11 +194,11 @@ export function Metrics() {
             <select
               value={selectedDatasetId}
               onChange={(e) => setSelectedDatasetId(e.target.value)}
-              className="input text-xs w-full py-1.5"
+              className="input text-xs w-full py-1.5 bg-background text-foreground"
             >
-              <option value="all">All Datasets</option>
+              <option value="all" className="bg-background text-foreground">All Datasets</option>
               {datasets.map((d) => (
-                <option key={d.id} value={d.id}>
+                <option key={d.id} value={d.id} className="bg-background text-foreground">
                   {d.name}
                 </option>
               ))}
@@ -211,11 +211,11 @@ export function Metrics() {
             <select
               value={selectedExperimentId}
               onChange={(e) => setSelectedExperimentId(e.target.value)}
-              className="input text-xs w-full py-1.5"
+              className="input text-xs w-full py-1.5 bg-background text-foreground"
             >
-              <option value="all">All Experiments</option>
+              <option value="all" className="bg-background text-foreground">All Experiments</option>
               {experiments.map((e) => (
-                <option key={e.id} value={e.id}>
+                <option key={e.id} value={e.id} className="bg-background text-foreground">
                   {e.name}
                 </option>
               ))}
@@ -228,12 +228,12 @@ export function Metrics() {
             <select
               value={selectedModelType}
               onChange={(e) => setSelectedModelType(e.target.value)}
-              className="input text-xs w-full py-1.5"
+              className="input text-xs w-full py-1.5 bg-background text-foreground"
             >
-              <option value="all">All Models</option>
-              <option value="random_forest">Random Forest</option>
-              <option value="logistic_regression">Logistic Regression</option>
-              <option value="xgboost">XGBoost</option>
+              <option value="all" className="bg-background text-foreground">All Models</option>
+              <option value="random_forest" className="bg-background text-foreground">Random Forest</option>
+              <option value="logistic_regression" className="bg-background text-foreground">Logistic Regression</option>
+              <option value="xgboost" className="bg-background text-foreground">XGBoost</option>
             </select>
           </div>
 
@@ -251,31 +251,33 @@ export function Metrics() {
       </div>
 
       {/* Navigation View Tabs */}
-      <div className="flex items-center gap-2 border-b border-border pb-2 overflow-x-auto text-xs">
+      <div className="flex items-center gap-3 border-b border-border pb-4 overflow-x-auto text-xs">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-md font-medium transition-colors ${
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-medium transition-all border shadow-sm whitespace-nowrap ${
             activeTab === 'overview'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+              ? 'bg-primary text-primary-foreground border-primary shadow-md'
+              : 'bg-card text-muted-foreground border-border/60 hover:text-foreground hover:bg-accent/50 hover:border-border'
           }`}
         >
-          <BarChart3 size={14} />
+          <BarChart3 size={15} />
           <span>Visual Charts</span>
         </button>
 
         <button
           onClick={() => setActiveTab('leaderboard')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-md font-medium transition-colors ${
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-medium transition-all border shadow-sm whitespace-nowrap ${
             activeTab === 'leaderboard'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+              ? 'bg-primary text-primary-foreground border-primary shadow-md'
+              : 'bg-card text-muted-foreground border-border/60 hover:text-foreground hover:bg-accent/50 hover:border-border'
           }`}
         >
-          <Award size={14} />
+          <Award size={15} />
           <span>Model Leaderboard</span>
           {filteredModelMetrics.length > 0 && (
-            <span className="bg-primary-foreground/20 text-primary-foreground text-[10px] px-1.5 py-0.2 rounded-full font-mono">
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ml-1 ${
+              activeTab === 'leaderboard' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+            }`}>
               {filteredModelMetrics.length}
             </span>
           )}
@@ -283,16 +285,18 @@ export function Metrics() {
 
         <button
           onClick={() => setActiveTab('experiments')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-md font-medium transition-colors ${
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-medium transition-all border shadow-sm whitespace-nowrap ${
             activeTab === 'experiments'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+              ? 'bg-primary text-primary-foreground border-primary shadow-md'
+              : 'bg-card text-muted-foreground border-border/60 hover:text-foreground hover:bg-accent/50 hover:border-border'
           }`}
         >
-          <FlaskConical size={14} />
+          <FlaskConical size={15} />
           <span>Experiment Analytics</span>
           {filteredExperimentMetrics.length > 0 && (
-            <span className="bg-primary-foreground/20 text-primary-foreground text-[10px] px-1.5 py-0.2 rounded-full font-mono">
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ml-1 ${
+              activeTab === 'experiments' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+            }`}>
               {filteredExperimentMetrics.length}
             </span>
           )}
@@ -300,16 +304,18 @@ export function Metrics() {
 
         <button
           onClick={() => setActiveTab('datasets')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-md font-medium transition-colors ${
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-medium transition-all border shadow-sm whitespace-nowrap ${
             activeTab === 'datasets'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+              ? 'bg-primary text-primary-foreground border-primary shadow-md'
+              : 'bg-card text-muted-foreground border-border/60 hover:text-foreground hover:bg-accent/50 hover:border-border'
           }`}
         >
-          <Database size={14} />
+          <Database size={15} />
           <span>Dataset Analytics</span>
           {filteredDatasetMetrics.length > 0 && (
-            <span className="bg-primary-foreground/20 text-primary-foreground text-[10px] px-1.5 py-0.2 rounded-full font-mono">
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ml-1 ${
+              activeTab === 'datasets' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+            }`}>
               {filteredDatasetMetrics.length}
             </span>
           )}
@@ -317,13 +323,13 @@ export function Metrics() {
 
         <button
           onClick={() => setActiveTab('compare')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-md font-medium transition-colors ${
+          className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-medium transition-all border shadow-sm whitespace-nowrap ${
             activeTab === 'compare'
-              ? 'bg-primary text-primary-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+              ? 'bg-primary text-primary-foreground border-primary shadow-md'
+              : 'bg-card text-muted-foreground border-border/60 hover:text-foreground hover:bg-accent/50 hover:border-border'
           }`}
         >
-          <TrendingUp size={14} />
+          <TrendingUp size={15} />
           <span>Run Comparison</span>
         </button>
       </div>
