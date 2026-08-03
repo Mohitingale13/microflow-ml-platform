@@ -194,11 +194,11 @@ export function Metrics() {
             <select
               value={selectedDatasetId}
               onChange={(e) => setSelectedDatasetId(e.target.value)}
-              className="input text-xs w-full py-1.5 bg-background text-foreground"
+              className="input text-xs w-full py-1.5 bg-surface text-text-primary"
             >
-              <option value="all" className="bg-background text-foreground">All Datasets</option>
+              <option value="all" className="bg-surface text-text-primary">All Datasets</option>
               {datasets.map((d) => (
-                <option key={d.id} value={d.id} className="bg-background text-foreground">
+                <option key={d.id} value={d.id} className="bg-surface text-text-primary">
                   {d.name}
                 </option>
               ))}
@@ -211,11 +211,11 @@ export function Metrics() {
             <select
               value={selectedExperimentId}
               onChange={(e) => setSelectedExperimentId(e.target.value)}
-              className="input text-xs w-full py-1.5 bg-background text-foreground"
+              className="input text-xs w-full py-1.5 bg-surface text-text-primary"
             >
-              <option value="all" className="bg-background text-foreground">All Experiments</option>
+              <option value="all" className="bg-surface text-text-primary">All Experiments</option>
               {experiments.map((e) => (
-                <option key={e.id} value={e.id} className="bg-background text-foreground">
+                <option key={e.id} value={e.id} className="bg-surface text-text-primary">
                   {e.name}
                 </option>
               ))}
@@ -228,12 +228,12 @@ export function Metrics() {
             <select
               value={selectedModelType}
               onChange={(e) => setSelectedModelType(e.target.value)}
-              className="input text-xs w-full py-1.5 bg-background text-foreground"
+              className="input text-xs w-full py-1.5 bg-surface text-text-primary"
             >
-              <option value="all" className="bg-background text-foreground">All Models</option>
-              <option value="random_forest" className="bg-background text-foreground">Random Forest</option>
-              <option value="logistic_regression" className="bg-background text-foreground">Logistic Regression</option>
-              <option value="xgboost" className="bg-background text-foreground">XGBoost</option>
+              <option value="all" className="bg-surface text-text-primary">All Models</option>
+              <option value="random_forest" className="bg-surface text-text-primary">Random Forest</option>
+              <option value="logistic_regression" className="bg-surface text-text-primary">Logistic Regression</option>
+              <option value="xgboost" className="bg-surface text-text-primary">XGBoost</option>
             </select>
           </div>
 
