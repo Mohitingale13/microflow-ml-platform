@@ -59,7 +59,7 @@ export function Dashboard() {
         <div>
           <h1 className="page-title text-2xl font-bold flex items-center gap-2.5">
             <LayoutDashboard size={24} className="text-primary" />
-            Engineering Dashboard
+            ML Operations Dashboard
           </h1>
           <p className="page-subtitle text-xs mt-1">
             Platform-wide overview — datasets, experiments, training runs, artifacts

@@ -326,11 +326,11 @@
 }
 
 .stat-value {
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 36px;
+  font-weight: 700;
   color: var(--color-text-primary);
-  letter-spacing: -0.5px;
-  margin-bottom: 4px;
+  letter-spacing: -1px;
+  margin-bottom: 2px;
 }
 
 .stat-desc {
