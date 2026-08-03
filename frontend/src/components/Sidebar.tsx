@@ -53,6 +53,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               <NavLink
                 to={path}
                 end={path === "/"}
+                onClick={onClose}
                 className={({ isActive }) =>
                   `nav-link ${isActive ? "nav-link--active" : ""}`
                 }
