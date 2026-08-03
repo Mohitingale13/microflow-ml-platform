@@ -9,19 +9,19 @@
 ![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Tests](https://img.shields.io/badge/Tests-188%2B%20Passing-success)
 
-![Hero Screenshot](docs/assets/hero.png)
+![Demo Video](assets/demo_video.webp)
 
 **An ML experimentation platform built for computational biology workflows.**
 
 ### Current Features
-✔ Dataset Management
-✔ Experiment Tracking
-✔ Run Tracking
-✔ Training Engine
-✔ Artifact Registry
-✔ Metrics Dashboard
-✔ Pipeline Visualization
-✔ Interactive Dashboard
+- ✔ Dataset Management
+- ✔ Experiment Tracking
+- ✔ Run Tracking
+- ✔ Training Engine
+- ✔ Artifact Registry
+- ✔ Metrics Dashboard
+- ✔ Pipeline Visualization
+- ✔ Interactive Dashboard
 
 ---
 
@@ -36,16 +36,15 @@ The platform is aimed at ML engineers, data scientists, and research engineers w
 ---
 
 ## Highlights
-
-✓ Full-stack ML platform
-✓ 188+ automated backend tests
-✓ Dockerized deployment
-✓ FastAPI + React
-✓ PostgreSQL
-✓ Experiment → Run architecture
-✓ Artifact Registry
-✓ Interactive Metrics Dashboard
-✓ Pipeline Visualization
+- ✔ Full-stack ML platform
+- ✔ 188+ automated backend tests
+- ✔ Dockerized deployment
+- ✔ FastAPI + React
+- ✔ PostgreSQL
+- ✔ Experiment → Run architecture
+- ✔ Artifact Registry
+- ✔ Interactive Metrics Dashboard
+- ✔ Pipeline Visualization
 
 ---
 
@@ -54,31 +53,24 @@ The platform is aimed at ML engineers, data scientists, and research engineers w
 A quick look at the platform in action.
 
 ### Dashboard
-![Dashboard](docs/assets/dashboard.png)
+![Dashboard](assets/dashboard.png)
 
-### Dataset Management
-![Upload Dataset Demo](docs/assets/upload-dataset.gif)
-![Dataset Page](docs/assets/dataset.png)
-
-### Experiment Tracking
-![Create Experiment Demo](docs/assets/create-experiment.gif)
-![Experiment Page](docs/assets/experiment.png)
+### Dataset Management & Experiments
+![Experiment Page](assets/experiments.png)
 
 ### Training Operations
-![Create Run Demo](docs/assets/create-run.gif)
-![Training Demo](docs/assets/training.gif)
-![Training Page](docs/assets/training-page.png)
-![Run Details](docs/assets/run-details.png)
+![Training Page](assets/training.png)
 
 ### Metrics Dashboard
-![Metrics Update Demo](docs/assets/metrics-update.gif)
-![Metrics Dashboard](docs/assets/metrics.png)
+![Metrics Dashboard](assets/metrics.png)
 
 ### Pipeline Visualization
-![Pipeline Graph](docs/assets/pipeline.png)
+![Pipeline Flow Graph](assets/pipeline_flow_graph.png)
+![Pipeline Timeline](assets/pipeline_timeline.png)
+![Pipeline Lineage](assets/pipeline.png)
 
 ### Artifact Registry
-![Artifact Registry](docs/assets/artifacts.png)
+![Artifact Registry](assets/artifacts.png)
 
 ---
 
