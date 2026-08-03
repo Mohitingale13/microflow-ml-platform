@@ -35,7 +35,7 @@ import { ConfigurationViewer } from '../components/experiments/ConfigurationView
 import { RunStatusBadge } from '../components/experiments/RunStatusBadge';
 import { ConfirmationDialog } from '../components/common/ConfirmationDialog';
 import { ExecuteRunModal } from '../components/experiments/ExecuteRunModal';
-import { TableSkeleton } from '../components/common/LoadingSkeleton';
+import { TableSkeleton, CardSkeleton } from '../components/common/LoadingSkeleton';
 import { ArtifactTypeBadge } from '../components/artifacts/ArtifactTypeBadge';
 import { ArtifactDetailModal } from '../components/artifacts/ArtifactDetailModal';
 import { formatBytes, formatModelType } from '../utils/format';
@@ -351,9 +351,8 @@ export function RunDetail() {
               </div>
             </div>
           ) : run.status === 'completed' && isLoadingResult ? (
-            <div className="p-8 bg-surface border border-border rounded-xl text-center">
-              <div className="animate-spin w-6 h-6 border-2 border-accent-blue border-t-transparent rounded-full mx-auto mb-2" />
-              <p className="text-xs text-text-muted">Loading persisted evaluation metrics…</p>
+            <div className="mt-4">
+              <CardSkeleton count={4} />
             </div>
           ) : null}
 
