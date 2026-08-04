@@ -1,8 +1,8 @@
-# MicroFlow
+﻿# MicroFlow
 
 <div align="center">
   <a href="https://microflow-ml-platform.vercel.app">
-    <h2>🌟 View Live Demo 🌟</h2>
+    <h2>ðŸŒŸ View Live Demo ðŸŒŸ</h2>
   </a>
 </div>
 
@@ -18,25 +18,25 @@
 ![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Tests](https://img.shields.io/badge/Tests-188%2B%20Passing-success)
 
-![Demo Video](assets/demo_video.webp)
+![Demo Video](images/demo_video.webp)
 
 **An ML experimentation platform built for computational biology workflows.**
 
 ### Current Features
-- ✔ Dataset Management
-- ✔ Experiment Tracking
-- ✔ Run Tracking
-- ✔ Training Engine
-- ✔ Artifact Registry
-- ✔ Metrics Dashboard
-- ✔ Pipeline Visualization
-- ✔ Interactive Dashboard
+- âœ” Dataset Management
+- âœ” Experiment Tracking
+- âœ” Run Tracking
+- âœ” Training Engine
+- âœ” Artifact Registry
+- âœ” Metrics Dashboard
+- âœ” Pipeline Visualization
+- âœ” Interactive Dashboard
 
 ---
 
 ## Overview
 
-Running one model once is easy. Running hundreds of experiments over several datasets, comparing results across model configurations, and reproducing a specific run six months later — that is the actual problem.
+Running one model once is easy. Running hundreds of experiments over several datasets, comparing results across model configurations, and reproducing a specific run six months later â€” that is the actual problem.
 
 MicroFlow is an internal ML platform designed to solve exactly that. It handles the infrastructure layer of machine learning: dataset versioning, experiment definition, run tracking, artifact persistence, and metrics aggregation. The actual biology is your concern; reproducibility and traceability are MicroFlow's.
 
@@ -45,15 +45,15 @@ The platform is aimed at ML engineers, data scientists, and research engineers w
 ---
 
 ## Highlights
-- ✔ Full-stack ML platform
-- ✔ 188+ automated backend tests
-- ✔ Dockerized deployment
-- ✔ FastAPI + React
-- ✔ PostgreSQL
-- ✔ Experiment → Run architecture
-- ✔ Artifact Registry
-- ✔ Interactive Metrics Dashboard
-- ✔ Pipeline Visualization
+- âœ” Full-stack ML platform
+- âœ” 188+ automated backend tests
+- âœ” Dockerized deployment
+- âœ” FastAPI + React
+- âœ” PostgreSQL
+- âœ” Experiment â†’ Run architecture
+- âœ” Artifact Registry
+- âœ” Interactive Metrics Dashboard
+- âœ” Pipeline Visualization
 
 ---
 
@@ -62,24 +62,24 @@ The platform is aimed at ML engineers, data scientists, and research engineers w
 A quick look at the platform in action.
 
 ### Dashboard
-![Dashboard](assets/dashboard.png)
+![Dashboard](images/dashboard.png)
 
 ### Dataset Management & Experiments
-![Experiment Page](assets/experiments.png)
+![Experiment Page](images/experiments.png)
 
 ### Training Operations
-![Training Page](assets/training.png)
+![Training Page](images/training.png)
 
 ### Metrics Dashboard
-![Metrics Dashboard](assets/metrics.png)
+![Metrics Dashboard](images/metrics.png)
 
 ### Pipeline Visualization
-![Pipeline Flow Graph](assets/pipeline_flow_graph.png)
-![Pipeline Timeline](assets/pipeline_timeline.png)
-![Pipeline Lineage](assets/pipeline.png)
+![Pipeline Flow Graph](images/pipeline_flow_graph.png)
+![Pipeline Timeline](images/pipeline_timeline.png)
+![Pipeline Lineage](images/pipeline.png)
 
 ### Artifact Registry
-![Artifact Registry](assets/artifacts.png)
+![Artifact Registry](images/artifacts.png)
 
 ---
 
@@ -125,25 +125,25 @@ graph TD
 - Upload CSV datasets through the UI or API
 - Automatic schema analysis: row count, column count, data types, missing value detection
 - Dataset preview (first N rows) and per-column statistics
-- SHA-256 deduplication — the same file will not be stored twice
+- SHA-256 deduplication â€” the same file will not be stored twice
 - Datasets are versioned and protected from deletion if experiments depend on them
 
 ### Experiment Management
 - Experiments define the ML problem: name, objective, linked dataset, and default training configuration
 - Multiple runs can be grouped under a single experiment
-- Experiment status lifecycle: `draft → active → archived`
+- Experiment status lifecycle: `draft â†’ active â†’ archived`
 - Per-experiment analytics showing best run, accuracy range, and model breakdown
 
 ### Run Management
 - Each run is an individual training execution with its own model type and hyperparameter overrides
-- Run status lifecycle: `draft → queued → running → completed / failed`
+- Run status lifecycle: `draft â†’ queued â†’ running â†’ completed / failed`
 - Full audit trail: created timestamp, started timestamp, completed timestamp, execution duration
 - Run notes and configuration stored as a snapshot for reproducibility
 
 ### Training Engine
 - Supports three model families out of the box: **Random Forest**, **Logistic Regression**, **XGBoost**
 - Preprocessing pipeline: missing value imputation (median for numeric, mode for categorical), one-hot encoding, stratified train/test split
-- Model Factory pattern — adding a new estimator requires changes in one file only
+- Model Factory pattern â€” adding a new estimator requires changes in one file only
 - All training logic is HTTP-free; the engine communicates through plain Python interfaces
 
 ### Artifact Registry
@@ -166,10 +166,10 @@ graph TD
 - Side-by-side run comparison: select any N runs and compare configurations and metrics in a table
 
 ### Pipeline Visualization
-- Per-run execution graph showing all eight pipeline stages: Dataset → Preprocessing → Feature Engineering → Model Factory → Training → Evaluation → Artifact Generation → Storage
+- Per-run execution graph showing all eight pipeline stages: Dataset â†’ Preprocessing â†’ Feature Engineering â†’ Model Factory â†’ Training â†’ Evaluation â†’ Artifact Generation â†’ Storage
 - Each node shows status, timestamps, and duration
 - Chronological timeline view for a selected run
-- Global lineage view: Dataset → Experiments → Runs → Artifacts, rendered as a collapsible tree
+- Global lineage view: Dataset â†’ Experiments â†’ Runs â†’ Artifacts, rendered as a collapsible tree
 - Filter runs by dataset, experiment, status, or model type
 
 ### Engineering Dashboard
@@ -250,42 +250,42 @@ graph TD
 
 ```
 MicroFlow/
-├── backend/
-│   ├── app/
-│   │   ├── api/            # Router registration
-│   │   ├── core/           # Config, logging
-│   │   ├── db/             # Session management, base model
-│   │   ├── models/         # SQLAlchemy ORM models
-│   │   ├── repositories/   # Database access layer
-│   │   ├── routers/        # FastAPI route handlers
-│   │   ├── schemas/        # Pydantic request/response models
-│   │   ├── services/       # Business logic
-│   │   ├── training/       # ML pipeline (loader, preprocessor, factory, trainer, evaluator)
-│   │   └── main.py
-│   ├── tests/
-│   │   ├── services/       # Service unit tests
-│   │   ├── training/       # Training engine unit tests
-│   │   ├── test_dashboard.py
-│   │   ├── test_metrics.py
-│   │   └── test_pipeline.py
-│   └── alembic/            # Database migrations
-├── frontend/
-│   └── src/
-│       ├── components/     # Reusable UI components per module
-│       ├── hooks/          # TanStack Query hooks
-│       ├── layouts/        # AppLayout, Sidebar, Navbar
-│       ├── pages/          # One page per feature
-│       ├── services/       # API client functions
-│       ├── types/          # TypeScript interfaces
-│       └── utils/          # Shared helpers
-├── docker/
-│   └── postgres/           # DB init scripts
-├── docs/
-│   ├── PROJECT_SPEC.md
-│   ├── ARCHITECTURE.md
-│   └── ROADMAP.md
-├── storage/                # Artifact file storage (volume-mounted)
-└── docker-compose.yml
+â”œâ”€â”€ backend/
+â”‚   â”œâ”€â”€ app/
+â”‚   â”‚   â”œâ”€â”€ api/            # Router registration
+â”‚   â”‚   â”œâ”€â”€ core/           # Config, logging
+â”‚   â”‚   â”œâ”€â”€ db/             # Session management, base model
+â”‚   â”‚   â”œâ”€â”€ models/         # SQLAlchemy ORM models
+â”‚   â”‚   â”œâ”€â”€ repositories/   # Database access layer
+â”‚   â”‚   â”œâ”€â”€ routers/        # FastAPI route handlers
+â”‚   â”‚   â”œâ”€â”€ schemas/        # Pydantic request/response models
+â”‚   â”‚   â”œâ”€â”€ services/       # Business logic
+â”‚   â”‚   â”œâ”€â”€ training/       # ML pipeline (loader, preprocessor, factory, trainer, evaluator)
+â”‚   â”‚   â””â”€â”€ main.py
+â”‚   â”œâ”€â”€ tests/
+â”‚   â”‚   â”œâ”€â”€ services/       # Service unit tests
+â”‚   â”‚   â”œâ”€â”€ training/       # Training engine unit tests
+â”‚   â”‚   â”œâ”€â”€ test_dashboard.py
+â”‚   â”‚   â”œâ”€â”€ test_metrics.py
+â”‚   â”‚   â””â”€â”€ test_pipeline.py
+â”‚   â””â”€â”€ alembic/            # Database migrations
+â”œâ”€â”€ frontend/
+â”‚   â””â”€â”€ src/
+â”‚       â”œâ”€â”€ components/     # Reusable UI components per module
+â”‚       â”œâ”€â”€ hooks/          # TanStack Query hooks
+â”‚       â”œâ”€â”€ layouts/        # AppLayout, Sidebar, Navbar
+â”‚       â”œâ”€â”€ pages/          # One page per feature
+â”‚       â”œâ”€â”€ services/       # API client functions
+â”‚       â”œâ”€â”€ types/          # TypeScript interfaces
+â”‚       â””â”€â”€ utils/          # Shared helpers
+â”œâ”€â”€ docker/
+â”‚   â””â”€â”€ postgres/           # DB init scripts
+â”œâ”€â”€ docs/
+â”‚   â”œâ”€â”€ PROJECT_SPEC.md
+â”‚   â”œâ”€â”€ ARCHITECTURE.md
+â”‚   â””â”€â”€ ROADMAP.md
+â”œâ”€â”€ storage/                # Artifact file storage (volume-mounted)
+â””â”€â”€ docker-compose.yml
 ```
 
 ---
@@ -299,15 +299,15 @@ Handles CSV ingestion and analysis. On upload, the service reads the file, compu
 Experiments sit between datasets and runs. An experiment defines the ML problem: what dataset to use, what the objective is, and what the default training configuration looks like. Multiple runs can be created under one experiment with different model types or hyperparameter overrides. This separation means the problem definition is stable while the execution varies.
 
 ### Run Management
-A run is a single training execution. It carries its own model type, hyperparameter overrides (stored as JSON), and status. The status transitions (`draft → queued → running → completed/failed`) are enforced by the service layer. Nothing in the run record is mutable after execution — the hyperparameters and model type used are part of the permanent audit trail.
+A run is a single training execution. It carries its own model type, hyperparameter overrides (stored as JSON), and status. The status transitions (`draft â†’ queued â†’ running â†’ completed/failed`) are enforced by the service layer. Nothing in the run record is mutable after execution â€” the hyperparameters and model type used are part of the permanent audit trail.
 
 ### Training Engine
 Five isolated files, each with a single job:
-- **loader.py** — reads a CSV from disk into a pandas DataFrame
-- **preprocessing.py** — imputes missing values, one-hot encodes categoricals, performs a stratified train/test split
-- **model_factory.py** — maps a model type string to a configured scikit-learn or XGBoost estimator using the Factory Pattern
-- **trainer.py** — calls `fit()` and returns the trained estimator
-- **evaluation.py** — computes accuracy, precision, recall, F1, ROC AUC (binary only), and confusion matrix
+- **loader.py** â€” reads a CSV from disk into a pandas DataFrame
+- **preprocessing.py** â€” imputes missing values, one-hot encodes categoricals, performs a stratified train/test split
+- **model_factory.py** â€” maps a model type string to a configured scikit-learn or XGBoost estimator using the Factory Pattern
+- **trainer.py** â€” calls `fit()` and returns the trained estimator
+- **evaluation.py** â€” computes accuracy, precision, recall, F1, ROC AUC (binary only), and confusion matrix
 
 The training service orchestrates these five steps, transitions run status, persists results, and generates artifacts. The engine itself knows nothing about HTTP or the database.
 
@@ -315,10 +315,10 @@ The training service orchestrates these five steps, transitions run status, pers
 Every completed run automatically produces six artifact files. The `ArtifactService` writes each file to disk, computes its SHA-256 checksum, records file size and MIME type, and persists the metadata in the `artifacts` table. A separate `RunResult` record stores the numeric metrics in structured database columns for fast querying. Artifacts can be downloaded directly via `GET /api/v1/artifacts/{id}/download`.
 
 ### Metrics Dashboard
-A read-only analytics layer that runs SQL aggregations over persisted `RunResult` records. It does not recompute metrics — it reads what was stored during training. The metrics router exposes five endpoints: global overview, model leaderboard, experiment analytics, dataset analytics, and run comparison.
+A read-only analytics layer that runs SQL aggregations over persisted `RunResult` records. It does not recompute metrics â€” it reads what was stored during training. The metrics router exposes five endpoints: global overview, model leaderboard, experiment analytics, dataset analytics, and run comparison.
 
 ### Pipeline Visualization
-A read-only module that reconstructs the execution graph for any run. It queries the `Run`, `RunResult`, and `Artifact` tables and maps the data onto an eight-stage pipeline representation. Each stage shows status, timing, and a navigation link. The lineage view walks the full Dataset → Experiment → Run → Artifact hierarchy.
+A read-only module that reconstructs the execution graph for any run. It queries the `Run`, `RunResult`, and `Artifact` tables and maps the data onto an eight-stage pipeline representation. Each stage shows status, timing, and a navigation link. The lineage view walks the full Dataset â†’ Experiment â†’ Run â†’ Artifact hierarchy.
 
 ### Engineering Dashboard
 An aggregation layer with four dedicated endpoints that pull data from existing repositories without duplicating SQL logic. The overview endpoint counts entities across all tables. The activity feed collects recent events from datasets, experiments, runs, and artifacts into a unified chronological list. The quick-stats endpoint identifies the best model family, best experiment, most-used dataset, and latest artifact in a single query pass.
@@ -374,7 +374,7 @@ All endpoints are prefixed with `/api/v1`.
 |---|---|---|
 | `GET` | `/pipeline/overview` | Global execution statistics |
 | `GET` | `/pipeline/runs` | All runs with filters |
-| `GET` | `/pipeline/lineage` | Full Dataset → Artifacts lineage tree |
+| `GET` | `/pipeline/lineage` | Full Dataset â†’ Artifacts lineage tree |
 | `GET` | `/pipeline/{run_id}` | Execution graph and timeline for a run |
 
 ### Dashboard
@@ -477,16 +477,16 @@ erDiagram
 
 When `POST /api/v1/runs/{run_id}/execute` is called, the `TrainingService` orchestrates the following sequence:
 
-1. **Validate** — confirm the run exists and its status is `queued`. Reject anything else with HTTP 422.
-2. **Transition** — set run status to `running`, persist the timestamp.
-3. **Load** — `loader.py` reads the CSV from disk into a pandas DataFrame. File not found raises immediately, marking the run as `failed`.
-4. **Preprocess** — `preprocessing.py` validates the target column, imputes missing values (median for numeric, mode for categorical), one-hot encodes categorical features, and performs a stratified 80/20 train/test split. A preprocessing summary (feature count, imputed columns, encoded columns) is captured for the run result.
-5. **Build estimator** — `model_factory.py` maps the run's `model_type` to a configured scikit-learn or XGBoost classifier. Unknown or missing model types fall back to Random Forest. Hyperparameters from `training_configuration` are applied.
-6. **Train** — `trainer.py` calls `estimator.fit(X_train, y_train)`. Timing starts before fit and ends after.
-7. **Evaluate** — `evaluation.py` runs `predict()` and computes accuracy, precision (weighted), recall (weighted), F1 (weighted), confusion matrix, and ROC AUC (binary classification only, requires `predict_proba`).
-8. **Persist result** — a `RunResult` record is written with all numeric metrics, timestamps, execution duration, and a snapshot of the training configuration.
-9. **Generate artifacts** — six files are written to `/storage/{experiment_id}/{run_id}/`. Each is registered in the `artifacts` table with its SHA-256 checksum and file size.
-10. **Transition** — run status moves to `completed`. On any unhandled exception in steps 3–9, status moves to `failed` with the error message recorded.
+1. **Validate** â€” confirm the run exists and its status is `queued`. Reject anything else with HTTP 422.
+2. **Transition** â€” set run status to `running`, persist the timestamp.
+3. **Load** â€” `loader.py` reads the CSV from disk into a pandas DataFrame. File not found raises immediately, marking the run as `failed`.
+4. **Preprocess** â€” `preprocessing.py` validates the target column, imputes missing values (median for numeric, mode for categorical), one-hot encodes categorical features, and performs a stratified 80/20 train/test split. A preprocessing summary (feature count, imputed columns, encoded columns) is captured for the run result.
+5. **Build estimator** â€” `model_factory.py` maps the run's `model_type` to a configured scikit-learn or XGBoost classifier. Unknown or missing model types fall back to Random Forest. Hyperparameters from `training_configuration` are applied.
+6. **Train** â€” `trainer.py` calls `estimator.fit(X_train, y_train)`. Timing starts before fit and ends after.
+7. **Evaluate** â€” `evaluation.py` runs `predict()` and computes accuracy, precision (weighted), recall (weighted), F1 (weighted), confusion matrix, and ROC AUC (binary classification only, requires `predict_proba`).
+8. **Persist result** â€” a `RunResult` record is written with all numeric metrics, timestamps, execution duration, and a snapshot of the training configuration.
+9. **Generate artifacts** â€” six files are written to `/storage/{experiment_id}/{run_id}/`. Each is registered in the `artifacts` table with its SHA-256 checksum and file size.
+10. **Transition** â€” run status moves to `completed`. On any unhandled exception in steps 3â€“9, status moves to `failed` with the error message recorded.
 
 ---
 
@@ -495,7 +495,7 @@ When `POST /api/v1/runs/{run_id}/execute` is called, the `TrainingService` orche
 ### Requirements
 
 - Docker and Docker Compose
-- No local Python or Node.js installation required — everything runs in containers
+- No local Python or Node.js installation required â€” everything runs in containers
 
 ### Start with Docker Compose
 
@@ -533,7 +533,7 @@ ENVIRONMENT=development
 docker compose exec backend pytest -v
 ```
 
-The test suite uses SQLite in-memory databases with SQLAlchemy's `StaticPool` — no external PostgreSQL connection required. 188 tests currently pass across all modules.
+The test suite uses SQLite in-memory databases with SQLAlchemy's `StaticPool` â€” no external PostgreSQL connection required. 188 tests currently pass across all modules.
 
 ### Development (without Docker)
 
@@ -557,11 +557,11 @@ Here is a complete flow from raw data to results.
 
 **1. Upload a dataset**
 
-Go to Datasets → Upload Dataset. Select a CSV file, give it a name. MicroFlow validates the file, analyses the schema, and makes it available immediately.
+Go to Datasets â†’ Upload Dataset. Select a CSV file, give it a name. MicroFlow validates the file, analyses the schema, and makes it available immediately.
 
 **2. Create an experiment**
 
-Go to Experiments → New Experiment. Select the dataset you just uploaded, define an objective (e.g. "Predict disease outcome"), and optionally set a default training configuration. The experiment groups all subsequent runs.
+Go to Experiments â†’ New Experiment. Select the dataset you just uploaded, define an objective (e.g. "Predict disease outcome"), and optionally set a default training configuration. The experiment groups all subsequent runs.
 
 **3. Create a run**
 
@@ -569,7 +569,7 @@ Inside the experiment, click New Run. Select a model type (Random Forest, Logist
 
 **4. Execute training**
 
-Click Execute on the queued run. The backend runs the full pipeline: preprocessing → training → evaluation → artifact generation. This happens synchronously and the UI updates with results on completion.
+Click Execute on the queued run. The backend runs the full pipeline: preprocessing â†’ training â†’ evaluation â†’ artifact generation. This happens synchronously and the UI updates with results on completion.
 
 **5. Review artifacts**
 
@@ -581,7 +581,7 @@ Go to Metrics. The Model Leaderboard shows how Random Forest compares to Logisti
 
 **7. Visualise the pipeline**
 
-Go to Pipeline, select your run. The eight-stage execution graph shows the status and duration of each stage. The Lineage view shows the full Dataset → Experiment → Run → Artifacts hierarchy.
+Go to Pipeline, select your run. The eight-stage execution graph shows the status and duration of each stage. The Lineage view shows the full Dataset â†’ Experiment â†’ Run â†’ Artifacts hierarchy.
 
 **8. Check the dashboard**
 
@@ -610,10 +610,10 @@ Metrics are stored in `RunResult` as typed database columns, not as JSON blobs. 
 The project runs as three containers: PostgreSQL, the FastAPI backend, and a Nginx-served React frontend. Docker Compose with health checks ensures services start in the correct order. The storage volume is mounted so artifact files survive container restarts.
 
 **Why PostgreSQL**
-Relational data with foreign key constraints. The `Dataset → Experiment → Run → Artifact` chain has well-defined referential integrity requirements. PostgreSQL's `RESTRICT` and `CASCADE` options enforce these at the database level.
+Relational data with foreign key constraints. The `Dataset â†’ Experiment â†’ Run â†’ Artifact` chain has well-defined referential integrity requirements. PostgreSQL's `RESTRICT` and `CASCADE` options enforce these at the database level.
 
 **Why TanStack Query**
-All server state on the frontend is managed by TanStack Query. This provides automatic caching, background refetching on a configurable interval, and a clean separation between server state and local UI state. No pages call `fetch()` directly — everything goes through typed service functions.
+All server state on the frontend is managed by TanStack Query. This provides automatic caching, background refetching on a configurable interval, and a clean separation between server state and local UI state. No pages call `fetch()` directly â€” everything goes through typed service functions.
 
 **Why FastAPI**
 FastAPI generates OpenAPI documentation automatically, enforces Pydantic validation on every request and response, and supports Python type hints throughout. The auto-generated Swagger UI at `/docs` is immediately usable for manual API testing during development.
@@ -622,12 +622,12 @@ FastAPI generates OpenAPI documentation automatically, enforces Pydantic validat
 
 ## Future Improvements
 
-- **Authentication and multi-user support** — the current platform is single-tenant with no user accounts. Adding JWT-based auth with role-based access control would be the next logical step.
-- **Background training jobs** — training currently runs synchronously in the request. Moving to a task queue (Celery, ARQ) would allow long-running jobs and proper async status polling.
-- **Cloud object storage** — artifacts are stored on local disk. Swapping the storage backend for S3-compatible storage requires only changes to the `ArtifactService`.
-- **Additional model families** — the Model Factory is designed to accept new estimators by adding a single builder function. LightGBM, CatBoost, and scikit-learn pipelines with feature transformers are natural additions.
-- **Experiment scheduling** — the ability to queue a batch of runs with different hyperparameter combinations (grid search, random search) without manual configuration.
-- **Distributed training** — the current architecture is single-process. The separation between the training engine and the rest of the backend means GPU workers or distributed compute nodes could be plugged in without redesigning the API layer.
+- **Authentication and multi-user support** â€” the current platform is single-tenant with no user accounts. Adding JWT-based auth with role-based access control would be the next logical step.
+- **Background training jobs** â€” training currently runs synchronously in the request. Moving to a task queue (Celery, ARQ) would allow long-running jobs and proper async status polling.
+- **Cloud object storage** â€” artifacts are stored on local disk. Swapping the storage backend for S3-compatible storage requires only changes to the `ArtifactService`.
+- **Additional model families** â€” the Model Factory is designed to accept new estimators by adding a single builder function. LightGBM, CatBoost, and scikit-learn pipelines with feature transformers are natural additions.
+- **Experiment scheduling** â€” the ability to queue a batch of runs with different hyperparameter combinations (grid search, random search) without manual configuration.
+- **Distributed training** â€” the current architecture is single-process. The separation between the training engine and the rest of the backend means GPU workers or distributed compute nodes could be plugged in without redesigning the API layer.
 
 ---
 
@@ -655,3 +655,4 @@ MIT
 ## Acknowledgements
 
 Inspired by the engineering principles behind [MLflow](https://mlflow.org), [Weights & Biases](https://wandb.ai), and [Kubeflow](https://kubeflow.org). MicroFlow is not affiliated with any of these projects.
+
