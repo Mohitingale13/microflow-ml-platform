@@ -253,42 +253,42 @@ graph TD
 
 ```
 MicroFlow/
-â”œâ”€â”€ backend/
-â”‚   â”œâ”€â”€ app/
-â”‚   â”‚   â”œâ”€â”€ api/            # Router registration
-â”‚   â”‚   â”œâ”€â”€ core/           # Config, logging
-â”‚   â”‚   â”œâ”€â”€ db/             # Session management, base model
-â”‚   â”‚   â”œâ”€â”€ models/         # SQLAlchemy ORM models
-â”‚   â”‚   â”œâ”€â”€ repositories/   # Database access layer
-â”‚   â”‚   â”œâ”€â”€ routers/        # FastAPI route handlers
-â”‚   â”‚   â”œâ”€â”€ schemas/        # Pydantic request/response models
-â”‚   â”‚   â”œâ”€â”€ services/       # Business logic
-â”‚   â”‚   â”œâ”€â”€ training/       # ML pipeline (loader, preprocessor, factory, trainer, evaluator)
-â”‚   â”‚   â””â”€â”€ main.py
-â”‚   â”œâ”€â”€ tests/
-â”‚   â”‚   â”œâ”€â”€ services/       # Service unit tests
-â”‚   â”‚   â”œâ”€â”€ training/       # Training engine unit tests
-â”‚   â”‚   â”œâ”€â”€ test_dashboard.py
-â”‚   â”‚   â”œâ”€â”€ test_metrics.py
-â”‚   â”‚   â””â”€â”€ test_pipeline.py
-â”‚   â””â”€â”€ alembic/            # Database migrations
-â”œâ”€â”€ frontend/
-â”‚   â””â”€â”€ src/
-â”‚       â”œâ”€â”€ components/     # Reusable UI components per module
-â”‚       â”œâ”€â”€ hooks/          # TanStack Query hooks
-â”‚       â”œâ”€â”€ layouts/        # AppLayout, Sidebar, Navbar
-â”‚       â”œâ”€â”€ pages/          # One page per feature
-â”‚       â”œâ”€â”€ services/       # API client functions
-â”‚       â”œâ”€â”€ types/          # TypeScript interfaces
-â”‚       â””â”€â”€ utils/          # Shared helpers
-â”œâ”€â”€ docker/
-â”‚   â””â”€â”€ postgres/           # DB init scripts
-â”œâ”€â”€ docs/
-â”‚   â”œâ”€â”€ PROJECT_SPEC.md
-â”‚   â”œâ”€â”€ ARCHITECTURE.md
-â”‚   â””â”€â”€ ROADMAP.md
-â”œâ”€â”€ storage/                # Artifact file storage (volume-mounted)
-â””â”€â”€ docker-compose.yml
+├── backend/
+│   ├── app/
+│   │   ├── api/            # Router registration
+│   │   ├── core/           # Config, logging
+│   │   ├── db/             # Session management, base model
+│   │   ├── models/         # SQLAlchemy ORM models
+│   │   ├── repositories/   # Database access layer
+│   │   ├── routers/        # FastAPI route handlers
+│   │   ├── schemas/        # Pydantic request/response models
+│   │   ├── services/       # Business logic
+│   │   ├── training/       # ML pipeline (loader, preprocessor, factory, trainer, evaluator)
+│   │   └── main.py
+│   ├── tests/
+│   │   ├── services/       # Service unit tests
+│   │   ├── training/       # Training engine unit tests
+│   │   ├── test_dashboard.py
+│   │   ├── test_metrics.py
+│   │   └── test_pipeline.py
+│   └── alembic/            # Database migrations
+├── frontend/
+│   └── src/
+│       ├── components/     # Reusable UI components per module
+│       ├── hooks/          # TanStack Query hooks
+│       ├── layouts/        # AppLayout, Sidebar, Navbar
+│       ├── pages/          # One page per feature
+│       ├── services/       # API client functions
+│       ├── types/          # TypeScript interfaces
+│       └── utils/          # Shared helpers
+├── docker/
+│   └── postgres/           # DB init scripts
+├── docs/
+│   ├── PROJECT_SPEC.md
+│   ├── ARCHITECTURE.md
+│   └── ROADMAP.md
+├── storage/                # Artifact file storage (volume-mounted)
+└── docker-compose.yml
 ```
 
 ---
