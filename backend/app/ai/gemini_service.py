@@ -19,7 +19,7 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 MODEL_NAME = "gemini-3.6-flash"
-FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-1.5-flash"]
+FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3.1-flash-lite"]
 
 
 class GeminiService:

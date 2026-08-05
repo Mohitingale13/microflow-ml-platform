@@ -55,7 +55,7 @@ The platform is aimed at ML engineers, data scientists, and research engineers w
 - ✔ Full-stack ML platform — FastAPI + React + PostgreSQL
 - ✔ 264+ automated backend tests, all passing
 - ✔ Dockerized, three-container deployment (Nginx + FastAPI + PostgreSQL)
-- ✔ Complete AI Engineering Suite powered by Google Gemini 1.5 Flash
+- ✔ Complete AI Engineering Suite powered by Google Gemini 3.6 Flash
 - ✔ Automatic exponential backoff & multi-model fallback for AI resilience
 - ✔ SHA-256 deterministic caching for all AI responses
 - ✔ Paginated Artifact Registry with latest-first ordering
@@ -160,7 +160,7 @@ All five AI capabilities share a common architecture: **zero hallucination by de
 
 #### AI Resilience Layer
 - Automatic **exponential backoff** with two retry attempts (1.5 s → 3 s) on 503/429 errors
-- **Multi-model fallback** chain: `gemini-1.5-flash` → `gemini-1.5-flash-8b` → `gemini-1.0-pro`
+- **Multi-model fallback** chain: `gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-3.1-flash-lite`
 - Errors are surfaced to the frontend with full API status context
 
 #### 1. Ask MicroFlow (Natural Language Assistant)
@@ -261,7 +261,7 @@ graph TD
     Storage["Local File Storage\n/storage"]
     Training["Training Engine\n(scikit-learn, XGBoost)"]
     AILayer["AI Layer\n(GeminiService, PromptBuilder, ResponseParser)"]
-    Gemini["Google Gemini API\n(gemini-1.5-flash + fallback chain)"]
+    Gemini["Google Gemini API\n(gemini-3.6-flash + fallback chain)"]
 
     Browser -->|HTTP/JSON| API
     API --> Routers
@@ -314,7 +314,7 @@ graph TD
 | **ORM** | SQLAlchemy 2.0 (mapped columns) |
 | **Validation** | Pydantic v2 |
 | **Database** | PostgreSQL 16 |
-| **AI Engine** | Google Gemini 1.5 Flash (with fallback chain) |
+| **AI Engine** | Google Gemini 3.6 Flash (with 3.5 & 3.1 fallback chain) |
 | **ML** | scikit-learn, XGBoost, pandas, NumPy |
 | **Infrastructure** | Docker, Docker Compose, Nginx |
 | **Testing** | pytest, SQLite in-memory (StaticPool) |
@@ -387,7 +387,7 @@ A run is a single training execution. It carries its own model type, hyperparame
 
 ### AI Layer (`backend/app/ai/`)
 Three files, each with a single job:
-- **`gemini_service.py`** — wraps the Google Generative AI SDK with exponential backoff retry logic (1.5 s, 3 s) and a three-model fallback chain (`gemini-1.5-flash` → `gemini-1.5-flash-8b` → `gemini-1.0-pro`). Raises a descriptive `HTTPException` with full API status on exhaustion.
+- **`gemini_service.py`** — wraps the Google Generative AI SDK with exponential backoff retry logic (1.5 s, 3 s) and a three-model fallback chain (`gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-3.1-flash-lite`). Raises a descriptive `HTTPException` with full API status on exhaustion.
 - **`prompt_builder.py`** — constructs fully grounded prompts from pre-fetched repository data. Never constructs SQL. Never invents values. All numeric fields are drawn directly from `RunResult` objects.
 - **`response_parser.py`** — strips markdown fences, extracts embedded JSON, validates required fields, and raises `ValueError` on malformed responses.
 
@@ -680,7 +680,7 @@ Gemini is never given access to the database. The `AssistantService` fetches all
 All AI responses are cached by a SHA-256 hash of the input prompt. Identical queries (same run, same data state) return instantly from the cache without calling Gemini. The cache is persisted in PostgreSQL so it survives restarts.
 
 **AI Resilience Layer**
-The `GeminiService` wraps every API call with exponential backoff retry logic (1.5 s → 3 s) and a three-model fallback chain. If the primary model (`gemini-1.5-flash`) returns 503 or 429, the service automatically retries with `gemini-1.5-flash-8b`, then `gemini-1.0-pro`, before raising an `HTTPException` with the full API error context.
+The `GeminiService` wraps every API call with exponential backoff retry logic (1.5 s → 3 s) and a three-model fallback chain. If the primary model (`gemini-3.6-flash`) returns 503 or 429, the service automatically retries with `gemini-3.5-flash`, then `gemini-3.1-flash-lite`, before raising an `HTTPException` with the full API error context.
 
 **Run vs Experiment separation**
 An experiment defines the problem. A run is one attempt at solving it. This separation allows multiple model configurations and hyperparameter sweeps to be grouped meaningfully under a single experiment.
