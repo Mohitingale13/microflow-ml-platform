@@ -1,0 +1,473 @@
+import { useState, useEffect } from 'react';
+import { 
+  Sparkles, RefreshCw, AlertCircle, ChevronDown, ChevronUp, 
+  TrendingUp, Sliders, AlertTriangle, ArrowRight, CheckCircle2 
+} from 'lucide-react';
+import { generateExperimentStrategy } from '../../services/experiment-strategy.service';
+import type { ExperimentStrategy, RecommendedNextExperiment } from '../../types/experiment-strategy.types';
+
+interface AIStrategyTabProps {
+  experimentId: string;
+}
+
+// ─── Skeleton Loader ──────────────────────────────────────────────────────────
+
+function StrategySkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse pb-12">
+      <div className="h-16 rounded-xl border border-white/10 bg-white/5 p-4" />
+      <div className="h-48 rounded-2xl border border-white/10 bg-white/5 p-6" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="h-40 rounded-xl border border-white/10 bg-white/5" />
+        <div className="h-40 rounded-xl border border-white/10 bg-white/5" />
+        <div className="h-40 rounded-xl border border-white/10 bg-white/5" />
+        <div className="h-40 rounded-xl border border-white/10 bg-white/5" />
+      </div>
+    </div>
+  );
+}
+
+// ─── Helpers for Text Shaping & Formatting ────────────────────────────────────
+
+function renderListItems(items: string[] | string | any[] | undefined): string[] {
+  if (!items) return [];
+  if (Array.isArray(items)) {
+    return items.map(item => (typeof item === 'string' ? item : JSON.stringify(item)));
+  }
+  return items.split('\n').map(s => s.replace(/^[*-]\s*/, '').trim()).filter(Boolean);
+}
+
+function getShortSentence(text: string | undefined, maxLen = 230): string {
+  if (!text) return 'Active experiment evaluation running normally.';
+  // Split on periods followed by whitespace or end of string so decimals (like 0.813 or 81.3%) are not treated as ends of sentences!
+  const sentences = text.split(/\.(?=\s|$)/);
+  if (sentences[0] && sentences[0].length > 20 && sentences[0].length <= maxLen) {
+    // Check if adding the second sentence still fits nicely
+    if (sentences[1] && (sentences[0].length + sentences[1].length + 2) <= maxLen) {
+      return `${sentences[0].trim()}. ${sentences[1].trim()}.`;
+    }
+    return `${sentences[0].trim()}.`;
+  }
+  if (text.length <= maxLen) return text;
+  return text.substring(0, maxLen).trim() + '...';
+}
+
+function parseBestRunInfo(strongestModel: string | undefined): { title: string; subtitle: string } {
+  if (!strongestModel || strongestModel === 'N/A' || strongestModel === 'None') {
+    return { title: 'No champion yet', subtitle: 'Awaiting run evaluations' };
+  }
+  // Example pattern: "Run #2 (XGBoost) - 0.9600 accuracy" or "Run #1 - Random Forest - 81.3%"
+  const matchRun = strongestModel.match(/(Run\s*#?\s*\d+)/i);
+  if (matchRun) {
+    const title = matchRun[1];
+    let remainder = strongestModel.replace(matchRun[1], '').replace(/^[-(:]+|[-):]+$/g, '').trim();
+    // Reformat decimals to percentages if suitable (e.g. 0.9600 -> 96.0%)
+    remainder = remainder.replace(/\b0\.(\d{2,4})\b/g, (m) => {
+      const val = parseFloat(m) * 100;
+      return `${val.toFixed(1)}%`;
+    });
+    return { title, subtitle: remainder || 'Top performing metric' };
+  }
+  return { title: strongestModel.slice(0, 24), subtitle: 'Current top configuration' };
+}
+
+function cleanListItem(item: string, maxLen = 85): string {
+  let cleaned = item
+    .replace(/^Run\s*#?\d+\s*[:-]\s*/i, '')
+    .replace(/^(Unexplored|Unvisited|Untested)\s*model\s*family\s*[:-]\s*/i, '')
+    .replace(/^(Unvisited|Unexplored)\s*.*?(parameter region|search space)\s*[:-]\s*/i, '')
+    .replace(/\b0\.(\d{2,4})\b/g, (m) => `${(parseFloat(m) * 100).toFixed(1)}%`);
+  if (cleaned.length > maxLen) cleaned = cleaned.substring(0, maxLen).trim() + '...';
+  return cleaned;
+}
+
+function strVal(val: any): string {
+  if (typeof val === 'string') return val;
+  if (val === null || val === undefined) return 'None specified.';
+  return JSON.stringify(val);
+}
+
+// ─── Main Component (Linear / Vercel Redesign) ────────────────────────────────
+
+export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
+  const [strategy, setStrategy] = useState<ExperimentStrategy | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showFullAnalysis, setShowFullAnalysis] = useState<boolean>(false);
+
+  const fetchStrategy = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await generateExperimentStrategy(experimentId);
+      if (res.success && res.data) {
+        setStrategy(res.data);
+      } else {
+        setError(res.message || 'Failed to generate AI Experiment Strategy.');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'An unexpected error occurred while generating strategy.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStrategy();
+  }, [experimentId]);
+
+  // ── Loading State ─────────────────────────────────────────────────────────
+  if (isLoading && !strategy) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3.5 bg-indigo-500/15 border border-indigo-500/30 rounded-2xl p-5 text-base text-indigo-200 shadow-md">
+          <Sparkles className="text-indigo-400 animate-spin shrink-0 w-6 h-6" />
+          <span className="font-medium">Synthesizing concise strategy from historical run metrics and search space...</span>
+        </div>
+        <StrategySkeleton />
+      </div>
+    );
+  }
+
+  // ── Error State ───────────────────────────────────────────────────────────
+  if (error || (!strategy && !isLoading)) {
+    return (
+      <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-center max-w-xl mx-auto shadow-xl">
+        <AlertCircle className="mx-auto mb-3 text-red-400 w-9 h-9" />
+        <h3 className="text-base font-bold text-red-300 mb-2">Strategy Evaluation Failed</h3>
+        <p className="text-sm text-gray-300 mb-6 leading-relaxed">{error || 'Unable to evaluate experiment history.'}</p>
+        <button
+          onClick={fetchStrategy}
+          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-all shadow-md cursor-pointer"
+        >
+          <RefreshCw size={15} />
+          Retry Evaluation
+        </button>
+      </div>
+    );
+  }
+
+  if (!strategy) return null;
+
+  // ── Extract and Normalize Data ────────────────────────────────────────────
+  const rec = (typeof strategy.recommended_next_experiment === 'object' && strategy.recommended_next_experiment !== null
+    ? strategy.recommended_next_experiment
+    : { action: strVal(strategy.recommended_next_experiment), rationale: 'Empirical analysis derived directly from run history.' }) as RecommendedNextExperiment;
+
+  const confidence = strVal(strategy.confidence).trim();
+  const getConfidenceBadge = (c: string) => {
+    switch (c.toLowerCase()) {
+      case 'high': 
+        return { dot: '🟢', text: 'High', class: 'text-emerald-300 bg-emerald-500/20 border-emerald-400/40' };
+      case 'medium': 
+        return { dot: '🟡', text: 'Medium', class: 'text-amber-300 bg-amber-500/20 border-amber-400/40' };
+      case 'low': 
+        return { dot: '🔴', text: 'Low', class: 'text-rose-300 bg-rose-500/20 border-rose-400/40' };
+      default: 
+        return { dot: '🔵', text: c, class: 'text-indigo-300 bg-indigo-500/20 border-indigo-400/40' };
+    }
+  };
+  const conf = getConfidenceBadge(confidence);
+
+  const isPlateaued = strategy.evidence_summary?.trend_and_plateau_analysis?.plateau_detected || 
+                      strategy.current_experiment_status.toLowerCase().includes('plateau') ||
+                      rec.action?.toLowerCase().includes('stop') || rec.action?.toLowerCase().includes('terminat');
+
+  const statusTitle = isPlateaued ? '🟡 Model has likely plateaued.' : '🟢 Experiment is progressing well.';
+  const statusSummary = getShortSentence(strategy.overall_assessment);
+
+  const bestRun = parseBestRunInfo(strategy.strongest_model);
+  const trendsList = renderListItems(strategy.observed_trends);
+  const learnedList = renderListItems(strategy.what_has_been_learned);
+  const searchSpaceList = renderListItems(strategy.remaining_search_space);
+  const risksList = renderListItems(strategy.potential_risks);
+  const evidenceList = renderListItems(strategy.evidence_used);
+
+  // Take punchy top items for the concise grid
+  const punchyTrend = trendsList[0] ? cleanListItem(trendsList[0], 90) : (isPlateaued ? 'Performance plateaued across recent iterations.' : 'Metric gains observing steady trajectory.');
+  const punchyInsights = learnedList.slice(0, 3).map(i => cleanListItem(i, 75));
+  const punchyUnexplored = searchSpaceList.slice(0, 3).map(i => cleanListItem(i, 65));
+
+  // Check stopping guidance wording for expanded view
+  const stoppingText = strategy.evidence_summary?.trend_and_plateau_analysis?.stopping_guidance || '';
+  const isContinueJustified = stoppingText.toLowerCase().includes('continued exploration') || stoppingText.toLowerCase().includes('justified') || !isPlateaued;
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-200 pb-16 font-sans text-text-primary">
+      
+      {/* ── Top Bar: Title & Status Banner ─────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+        <div className="flex items-center gap-2.5">
+          <Sparkles className="w-5 h-5 text-indigo-400 shrink-0" />
+          <h2 className="text-base font-bold text-white tracking-wide uppercase">AI Experiment Strategy</h2>
+        </div>
+        <button
+          onClick={fetchStrategy}
+          disabled={isLoading}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs sm:text-sm font-semibold text-gray-200 hover:text-white hover:bg-white/10 transition-all self-start sm:self-auto cursor-pointer shadow-sm"
+        >
+          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+          <span>Refresh Strategy</span>
+        </button>
+      </div>
+
+      {/* ── Overall Assessment Banner (Linear style, high contrast) ────────── */}
+      <div className="bg-white/[0.05] border border-white/15 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-3.5 shadow-md">
+        <span className="font-extrabold text-base text-white whitespace-nowrap shrink-0 flex items-center gap-2">
+          {statusTitle}
+        </span>
+        <p className="text-sm sm:text-base text-gray-200 leading-relaxed font-medium sm:border-l sm:border-white/15 sm:pl-4 flex-1">
+          {statusSummary}
+        </p>
+      </div>
+
+      {/* ── Hero Recommendation Card ───────────────────────────────────────── */}
+      <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-500/15 via-purple-500/10 to-transparent p-6 sm:p-8 shadow-2xl relative">
+        <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-6">
+          <div className="space-y-3 flex-1">
+            <span className="text-xs font-black tracking-widest uppercase text-indigo-300 block bg-indigo-500/20 px-2.5 py-1 rounded-md border border-indigo-400/30 w-fit">
+              Recommendation
+            </span>
+            <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
+              Next experiment: <span className="text-indigo-100 font-medium">{rec.action || 'Evaluate alternative estimator baselines.'}</span>
+            </h3>
+          </div>
+
+          {/* Confidence & Reason Block (High Contrast, Larger Font) */}
+          <div className="shrink-0 bg-black/50 border border-white/20 rounded-xl p-5 max-w-md space-y-2.5 shadow-inner">
+            <div className="flex items-center justify-between gap-4 text-sm font-bold">
+              <span className="text-gray-300 uppercase tracking-wider text-xs">Confidence:</span>
+              <span className={`px-3 py-1 rounded-full border text-xs sm:text-sm font-extrabold inline-flex items-center gap-1.5 shadow-sm ${conf.class}`}>
+                <span>{conf.dot}</span>
+                <span>{conf.text}</span>
+              </span>
+            </div>
+            <div className="text-xs sm:text-sm leading-relaxed text-gray-200 font-normal pt-1 border-t border-white/10">
+              <span className="font-bold text-white uppercase text-[11px] tracking-wider block mb-1">Empirical Rationale:</span> 
+              {rec.rationale || 'Derived from current search space completion and iteration metrics.'}
+            </div>
+          </div>
+        </div>
+
+        {/* Suggested Configuration Bar (Crisp parameter badges) */}
+        <div className="mt-8 pt-5 border-t border-white/15 flex flex-col md:flex-row md:items-center gap-4">
+          <span className="text-sm font-bold text-gray-200 flex items-center gap-2 shrink-0 uppercase tracking-wider">
+            <Sliders size={15} className="text-indigo-400" /> Suggested Configuration:
+          </span>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {rec.model_type && (
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border border-indigo-400/40 px-3.5 py-1.5 rounded-xl text-sm font-mono font-extrabold shadow-md">
+                Model: {rec.model_type}
+              </span>
+            )}
+            {rec.hyperparameters && Object.keys(rec.hyperparameters).length > 0 ? (
+              Object.entries(rec.hyperparameters).map(([k, v]) => (
+                <span key={k} className="bg-white/10 border border-white/20 text-white px-3 py-1.5 rounded-xl text-sm font-mono font-medium shadow-sm flex items-center gap-1.5">
+                  <span className="text-gray-400">{k}:</span>
+                  <span className="text-emerald-300 font-extrabold">{strVal(v)}</span>
+                </span>
+              ))
+            ) : (
+              <span className="text-sm text-gray-400 italic font-medium">Default estimator parameters suggested for initial baseline.</span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Concise 4-Column Scannable Grid (Larger font, higher contrast) ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-2">
+        
+        {/* 1. Best Run */}
+        <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] hover:border-indigo-400/40 transition-all shadow-md group">
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block flex items-center gap-2">
+              🏆 Current Best Run
+            </span>
+            <div className="text-xl font-extrabold text-white tracking-tight">{bestRun.title}</div>
+            <div className="text-xs sm:text-sm text-emerald-300 font-semibold mt-1 truncate" title={bestRun.subtitle}>
+              {bestRun.subtitle}
+            </div>
+          </div>
+          <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-end text-sm font-bold text-gray-300 group-hover:text-indigo-300 transition-colors cursor-pointer" title="Switch to Runs tab to inspect">
+            <span>View in Runs tab</span>
+            <ArrowRight size={15} className="ml-1" />
+          </div>
+        </div>
+
+        {/* 2. Trend */}
+        <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block flex items-center gap-2">
+              📈 Trend
+            </span>
+            <p className="text-sm text-gray-200 leading-relaxed font-medium mt-1">
+              {punchyTrend}
+            </p>
+          </div>
+          {isPlateaued ? (
+            <div className="mt-4 pt-3 border-t border-white/10 text-xs sm:text-sm font-bold text-amber-400 flex items-center gap-1.5">
+              <span>⚠️ Diminishing returns reached</span>
+            </div>
+          ) : (
+            <div className="mt-4 pt-3 border-t border-white/10 text-xs sm:text-sm font-bold text-emerald-400 flex items-center gap-1.5">
+              <span>🟢 Active improvement trajectory</span>
+            </div>
+          )}
+        </div>
+
+        {/* 3. Insights */}
+        <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
+          <div>
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex items-center gap-2">
+              ⚡ Insights
+            </span>
+            <ul className="space-y-2.5 text-xs sm:text-sm text-gray-200 font-medium">
+              {punchyInsights.length > 0 ? (
+                punchyInsights.map((ins, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className="text-emerald-400 font-bold shrink-0 text-sm">✓</span>
+                    <span className="leading-snug text-gray-200" title={ins}>{ins}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="text-sm text-gray-400 italic">Awaiting run variance analysis.</li>
+              )}
+            </ul>
+          </div>
+        </div>
+
+        {/* 4. Not Yet Explored */}
+        <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
+          <div>
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex items-center gap-2">
+              🔍 Not Yet Explored
+            </span>
+            <ul className="space-y-2.5 text-xs sm:text-sm text-gray-200 font-medium">
+              {punchyUnexplored.length > 0 ? (
+                punchyUnexplored.map((ux, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className="text-indigo-400 font-mono font-black shrink-0 text-sm">□</span>
+                    <span className="leading-snug text-gray-200" title={ux}>{ux}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="text-sm text-gray-400 italic">Search space extensively probed.</li>
+              )}
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── Show Full Analysis Toggle Button ───────────────────────────────── */}
+      <div className="flex justify-center pt-6">
+        <button
+          onClick={() => setShowFullAnalysis(!showFullAnalysis)}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/20 bg-white/10 text-sm font-bold text-gray-200 hover:text-white hover:bg-white/15 transition-all shadow-lg cursor-pointer"
+        >
+          <span>{showFullAnalysis ? 'Hide Full Analysis' : 'Show Full Analysis'}</span>
+          {showFullAnalysis ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+      </div>
+
+      {/* ── Advanced Engineering Analysis Drawer (Only shown when toggled) ─── */}
+      {showFullAnalysis && (
+        <div className="mt-8 space-y-6 pt-8 border-t border-white/15 animate-in slide-in-from-top-2 duration-200">
+          
+          <div className="text-sm font-bold uppercase tracking-wider text-gray-300">
+            Advanced Engineering Breakdown
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Full Trajectory & Stability Analysis */}
+            <div className="rounded-2xl border border-white/15 bg-black/40 p-6 space-y-5 shadow-lg">
+              <h4 className="text-base font-bold text-white flex items-center gap-2.5 border-b border-white/10 pb-3">
+                <TrendingUp size={18} className="text-blue-400" />
+                <span>Complete Trajectory & Stability</span>
+              </h4>
+              
+              <div className="space-y-4 text-sm">
+                <div>
+                  <span className="text-gray-400 font-bold block mb-1 uppercase text-xs tracking-wider">Overall Assessment:</span>
+                  <p className="text-gray-200 leading-relaxed font-normal">{strategy.overall_assessment}</p>
+                </div>
+                
+                <div className="pt-3 border-t border-white/10">
+                  <span className="text-gray-400 font-bold block mb-1.5 uppercase text-xs tracking-wider">Most Stable Model (Low Variance):</span>
+                  <code className="text-emerald-300 font-mono block bg-white/10 px-3 py-2 rounded-lg border border-white/15 text-sm font-semibold">
+                    {strategy.most_stable_model || 'None evaluated yet'}
+                  </code>
+                </div>
+
+                {stoppingText && (
+                  <div className="pt-3 border-t border-white/10">
+                    {isContinueJustified ? (
+                      <div>
+                        <span className="text-emerald-400 font-bold block flex items-center gap-1.5 mb-1 text-sm">
+                          <CheckCircle2 size={16} className="text-emerald-400 shrink-0" /> Exploration Status:
+                        </span>
+                        <p className="text-gray-200 leading-relaxed font-medium pl-6">
+                          {stoppingText}
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        <span className="text-amber-400 font-bold block flex items-center gap-1.5 mb-1 text-sm">
+                          <AlertTriangle size={16} className="text-amber-400 shrink-0" /> Stopping Guidance:
+                        </span>
+                        <p className="text-gray-200 leading-relaxed font-medium pl-6">
+                          {stoppingText}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Potential Risks & Empirical Evidence Sources */}
+            <div className="rounded-2xl border border-white/15 bg-black/40 p-6 space-y-5 shadow-lg flex flex-col justify-between">
+              <div>
+                <h4 className="text-base font-bold text-white flex items-center gap-2.5 border-b border-white/10 pb-3 mb-4">
+                  <AlertCircle size={18} className="text-rose-400" />
+                  <span>Potential Risks & Hazards</span>
+                </h4>
+                <ul className="space-y-3 text-sm text-gray-200 font-medium">
+                  {risksList.length > 0 ? (
+                    risksList.map((risk, i) => (
+                      <li key={i} className="flex items-start gap-3 leading-relaxed">
+                        <span className="text-rose-400 font-black shrink-0">•</span>
+                        <span className="text-gray-200">{risk}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="italic text-gray-400">No operational risks identified.</li>
+                  )}
+                </ul>
+              </div>
+
+              {evidenceList.length > 0 && (
+                <div className="pt-5 mt-5 border-t border-white/15">
+                  <span className="text-xs font-bold text-gray-300 uppercase tracking-wider block mb-3">
+                    📊 Empirical Evidence Sources Utilized
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {evidenceList.map((ev, idx) => (
+                      <span key={idx} className="bg-white/10 px-3 py-1 rounded-lg border border-white/20 text-xs text-gray-200 font-mono font-medium shadow-sm">
+                        {ev}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
+          
+        </div>
+      )}
+
+    </div>
+  );
+}

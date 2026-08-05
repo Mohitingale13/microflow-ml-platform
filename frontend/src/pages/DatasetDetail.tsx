@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Database, Table2, FileBarChart, HardDrive, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Trash2, Database, Table2, FileBarChart, HardDrive, AlertCircle, Sparkles } from 'lucide-react';
 import { formatBytes } from '@/utils/format';
 import { useDataset, useDatasetPreview, useDatasetStatistics, useDeleteDataset } from '../hooks/useDatasets';
 import { StatusBadge } from '../components/datasets/StatusBadge';
 import { PreviewTable } from '../components/datasets/PreviewTable';
 import { StatisticsPanel } from '../components/datasets/StatisticsPanel';
+import { AIInsightsTab } from '../components/datasets/AIInsightsTab';
 
 export function DatasetDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'schema' | 'preview' | 'statistics' | 'storage'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'schema' | 'preview' | 'statistics' | 'storage' | 'ai_insights'>('overview');
   
   const { data: dataset, isLoading, error } = useDataset(id!);
   const { data: preview, isLoading: isLoadingPreview, error: previewError } = useDatasetPreview(id!);
@@ -64,6 +65,7 @@ export function DatasetDetail() {
     { id: 'preview', label: 'Preview', icon: <Table2 className="w-4 h-4" /> },
     { id: 'statistics', label: 'Statistics', icon: <FileBarChart className="w-4 h-4" /> },
     { id: 'storage', label: 'Storage', icon: <HardDrive className="w-4 h-4" /> },
+    { id: 'ai_insights', label: '✨ AI Insights', icon: <Sparkles className="w-4 h-4 text-purple-400" /> },
   ] as const;
 
   return (
@@ -242,6 +244,10 @@ export function DatasetDetail() {
               </div>
             </div>
           </div>
+        )}
+
+        {activeTab === 'ai_insights' && (
+          <AIInsightsTab datasetId={id!} />
         )}
       </div>
     </div>

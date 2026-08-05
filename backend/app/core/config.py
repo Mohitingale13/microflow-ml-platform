@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: list[str] = []
     STORAGE_BASE_PATH: str = "storage"
     MAX_UPLOAD_SIZE_MB: int = 100
+    GEMINI_API_KEY: str | None = None
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

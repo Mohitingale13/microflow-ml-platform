@@ -13,6 +13,9 @@ from app.schemas.dataset import (
     DatasetStatisticsResponse,
 )
 from app.services.dataset_service import DatasetService
+from app.ai.gemini_service import GeminiService
+from app.repositories.dataset_ai_analysis_repository import DatasetAIAnalysisRepository
+from app.services.dataset_ai_service import DatasetAIService
 from app.utils.response import ApiResponse
 
 logger = logging.getLogger(__name__)
@@ -24,6 +27,15 @@ def get_dataset_service() -> DatasetService:
     return DatasetService(
         repository=DatasetRepository(),
         experiment_repository=ExperimentRepository(),
+    )
+
+
+def get_dataset_ai_service() -> DatasetAIService:
+    return DatasetAIService(
+        dataset_repo=DatasetRepository(),
+        analysis_repo=DatasetAIAnalysisRepository(),
+        gemini_service=GeminiService(),
+        dataset_service=get_dataset_service(),
     )
 
 
@@ -107,3 +119,21 @@ def delete_dataset(
 ) -> ApiResponse:
     service.delete(dataset_id, db)
     return ApiResponse.ok(message="Dataset deleted successfully")
+
+
+@router.post("/{dataset_id}/analyze", response_model=ApiResponse)
+def analyze_dataset(
+    dataset_id: str,
+    db: Session = Depends(get_db),
+    service: DatasetAIService = Depends(get_dataset_ai_service),
+) -> ApiResponse:
+    """
+    Generate or retrieve a cached AI Dataset Intelligence review for a ready dataset.
+    """
+    analysis = service.get_or_generate_analysis(dataset_id=dataset_id, db=db)
+    message = (
+        "Cached dataset analysis retrieved."
+        if analysis.cached
+        else "AI Dataset Intelligence generated successfully."
+    )
+    return ApiResponse.ok(data=analysis.model_dump(mode="json"), message=message)

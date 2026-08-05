@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("MicroFlow backend starting — environment: %s", settings.ENVIRONMENT)
+    from app.db.session import engine
+    from app.db.base import Base
+    import app.models  # noqa: F401
+    Base.metadata.create_all(bind=engine)
     yield
     logger.info("MicroFlow backend shutting down")
 

@@ -13,7 +13,7 @@
 ![Render](https://img.shields.io/badge/Render-Backend_Deployed-46E3B7?style=flat&logo=render&logoColor=white)
 ![Neon](https://img.shields.io/badge/Neon-Database_Live-00E599?style=flat&logo=neon&logoColor=white)
 ![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
-![Tests](https://img.shields.io/badge/Tests-188%2B%20Passing-success)
+![Tests](https://img.shields.io/badge/Tests-240%2B%20Passing-success)
 
 <br>
 
@@ -29,6 +29,7 @@
 - ✔ Dataset Management
 - ✔ Experiment Tracking
 - ✔ Run Tracking
+- ✔ AI Dataset Intelligence, Run Review, Comparison, Experiment Strategy & Ask MicroFlow Assistant
 - ✔ Training Engine
 - ✔ Artifact Registry
 - ✔ Metrics Dashboard
@@ -49,11 +50,12 @@ The platform is aimed at ML engineers, data scientists, and research engineers w
 
 ## Highlights
 - ✔ Full-stack ML platform
-- ✔ 188+ automated backend tests
+- ✔ 260+ automated backend tests
 - ✔ Dockerized deployment
 - ✔ FastAPI + React
 - ✔ PostgreSQL
 - ✔ Experiment → Run architecture
+- ✔ AI Engineering Suite: Dataset Intelligence, Experiment Strategy, Run Review, Compare & Ask MicroFlow
 - ✔ Artifact Registry
 - ✔ Interactive Metrics Dashboard
 - ✔ Pipeline Visualization
@@ -142,6 +144,25 @@ graph TD
 - Run status lifecycle: `draft → queued → running → completed / failed`
 - Full audit trail: created timestamp, started timestamp, completed timestamp, execution duration
 - Run notes and configuration stored as a snapshot for reproducibility
+
+### AI-Powered Engineering Suite
+- **AI Experiment Strategy**: Evidence-driven experimentation strategist operating as an authoritative ML co-pilot via the `✨ AI Strategy` tab:
+  - **Empirical Evidence Computation**: Synthesizes dataset quality metrics, metric variance ($\sigma$), chronological run trajectories, speed comparisons (fastest/slowest), and parameter space coverage. Zero speculation or invented values.
+  - **Search Space Exploration & Gap Analysis**: Proactively maps out unexplored model families (Random Forest, XGBoost, Logistic Regression) and unvisited hyperparameter regions.
+  - **Plateau & Diminishing Returns Detection**: Automatically identifies metric saturation across consecutive iterations and advises stopping tuning to prioritize data-level enhancements.
+  - **Grounded Recommendation Engine**: Recommends the single best next experiment with concrete algorithm families and parameter bounds, supported by confidence gauges and explicit empirical evidence.
+- **AI Dataset Intelligence**: Automated pre-training dataset auditing and feature evaluation via an integrated `✨ AI Insights` tab:
+  - **Deterministic Quality Scoring**: Computes a transparent, zero-hallucination dataset quality score (0–100) based directly on missing value ratios, volume adequacy, and feature completeness.
+  - **Automated Target & Feature Detection**: Evaluates column schema and unique distributions to suggest optimal supervised learning target variables and feature observations.
+  - **Pre-Training Recommendations**: Generates algorithm suitability ratings (Random Forest, XGBoost, Logistic Regression) and step-by-step preprocessing roadmaps.
+- **AI Run Review**: Generates a professional peer review for completed runs: overall assessment, strengths, weaknesses, comparison with best run, and recommended next steps.
+- **AI Run Comparison**: Directly compare any two runs within an experiment with deep configuration attribution, tradeoffs, and improvement strategies.
+- **Ask MicroFlow (Natural Language Assistant)**: An intelligent conversational assistant specialized in machine learning engineering:
+  - Ask intuitive natural language questions (e.g., *"Which experiment has the best accuracy?"*, *"Why did run 4 fail?"*, *"Compare all XGBoost models"*).
+  - **Zero Hallucination Guarantee**: All answers are grounded strictly in authentic database records fetched via secure repository layer methods; Gemini never writes SQL or accesses PostgreSQL directly.
+  - **Structured Responses**: Every response delivers an *Engineering Answer*, *Analytical Reasoning*, *Supporting Data (Source of Truth)*, and *Recommended Next Strategy*.
+  - **Deterministic SHA-256 Caching**: Idempotency layer guarantees instant cache hits for recurring queries without redundant API consumption.
+
 
 ### Training Engine
 - Supports three model families out of the box: **Random Forest**, **Logistic Regression**, **XGBoost**
