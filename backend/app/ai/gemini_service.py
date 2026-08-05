@@ -19,7 +19,7 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 MODEL_NAME = "gemini-3.6-flash"
-FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3.1-flash-lite"]
+FALLBACK_MODELS = ["gemini-3.5-flash"]
 
 
 class GeminiService:
@@ -119,6 +119,11 @@ class GeminiService:
                 "Google AI providers are experiencing extreme global demand spikes right now. "
                 "MicroFlow attempted automatic retries and failovers, but AI compute clusters remain busy. "
                 "Please wait 30 seconds and try your request again."
+            ) from last_exc
+        elif "429" in exc_str or "resource exhausted" in exc_str or "quota" in exc_str or "rate limit" in exc_str:
+            raise RuntimeError(
+                "Google Gemini AI free-tier rate limit or quota has been momentarily reached. "
+                "Please wait 30 seconds for your token bucket to replenish before running your query again."
             ) from last_exc
 
         raise RuntimeError(f"Gemini AI processing failed: {last_exc}") from last_exc
