@@ -49,13 +49,15 @@ export function Assistant() {
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const [recentQueries, setRecentQueries] = useState<AIQueryResponse[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
+  const [refreshFeedback, setRefreshFeedback] = useState(false);
 
   useEffect(() => {
-    loadAuxiliaryData();
+    loadAuxiliaryData(false);
   }, []);
 
-  async function loadAuxiliaryData() {
+  async function loadAuxiliaryData(isManual = false) {
     setRecentLoading(true);
+    const startTime = Date.now();
     try {
       const [sugRes, recRes] = await Promise.all([
         getSuggestedQuestions().catch(() => ({ data: DEFAULT_SUGGESTIONS })),
@@ -67,8 +69,16 @@ export function Assistant() {
       if (recRes?.data) {
         setRecentQueries(recRes.data);
       }
+      if (isManual) {
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 500) await new Promise(r => setTimeout(r, 500 - elapsed));
+      }
     } finally {
       setRecentLoading(false);
+      if (isManual) {
+        setRefreshFeedback(true);
+        setTimeout(() => setRefreshFeedback(false), 2000);
+      }
     }
   }
 
@@ -166,7 +176,7 @@ export function Assistant() {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask anything about your experiments, runs, metrics, or models..."
+                placeholder="Query metrics, runs, models, or datasets..."
                 className="w-full bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none text-sm sm:text-base font-medium px-2 py-1.5"
                 disabled={loading}
               />
@@ -257,7 +267,7 @@ export function Assistant() {
                   <CheckCircle2 size={20} />
                 </span>
                 <h3 className="font-bold text-base tracking-wide text-gray-900 dark:text-gray-100">
-                  Engineering Answer
+                  Analysis & Findings
                 </h3>
               </div>
               <p className="text-gray-800 dark:text-gray-200 text-base leading-relaxed whitespace-pre-wrap font-normal">
@@ -272,7 +282,7 @@ export function Assistant() {
                   <Cpu size={18} />
                 </span>
                 <h3 className="font-bold text-sm uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                  Analytical Reasoning
+                  Reasoning
                 </h3>
               </div>
               <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
@@ -287,7 +297,7 @@ export function Assistant() {
                   <Database size={18} />
                 </span>
                 <h3 className="font-bold text-sm uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                  Supporting Data (Source of Truth)
+                  Telemetry Evidence
                 </h3>
               </div>
               <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed font-mono text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
@@ -302,7 +312,7 @@ export function Assistant() {
                   <Lightbulb size={18} />
                 </span>
                 <h3 className="font-bold text-sm uppercase tracking-wider text-amber-900 dark:text-amber-300">
-                  Recommended Next Experiment & Strategy
+                  Suggested Next Step
                 </h3>
               </div>
               <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed whitespace-pre-wrap font-medium">
@@ -318,10 +328,10 @@ export function Assistant() {
             <Sparkles size={32} />
           </div>
           <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
-            How can MicroFlow help with your ML experiments today?
+            Query your experiment telemetry.
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-2.5 leading-relaxed">
-            Ask natural language questions about your datasets, training runs, accuracy benchmarks, model comparisons, or evaluation failures. Get immediate answers based directly on your recorded experiment results.
+          <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xl mx-auto mt-2.5 leading-relaxed font-medium">
+            Analyze evaluation metrics, compare model performance deltas, or troubleshoot training failures across your workspace.
           </p>
         </div>
       )}
@@ -334,11 +344,21 @@ export function Assistant() {
             <span>Recent Platform Questions</span>
           </h3>
           <button
-            onClick={() => loadAuxiliaryData()}
-            className="text-xs font-medium text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
+            onClick={() => loadAuxiliaryData(true)}
+            disabled={recentLoading}
+            className="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw size={12} className={recentLoading ? "animate-spin" : ""} />
-            <span>Refresh list</span>
+            {refreshFeedback ? (
+              <>
+                <CheckCircle2 size={13} className="text-emerald-400" />
+                <span className="text-emerald-300 font-bold">Updated!</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw size={13} className={recentLoading ? "animate-spin text-purple-200" : ""} />
+                <span>{recentLoading ? "Refreshing..." : "Refresh list"}</span>
+              </>
+            )}
           </button>
         </div>
 

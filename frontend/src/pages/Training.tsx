@@ -8,6 +8,7 @@ import {
   Brain,
   FlaskConical,
   X,
+  CheckCircle2,
 } from 'lucide-react';
 import { useRuns, useExperiments, useQueueRun, useCancelRun, useExecuteRun } from '@/hooks/useExperiments';
 import { useDatasets, useDataset } from '@/hooks/useDatasets';
@@ -34,6 +35,22 @@ export function Training() {
   const [modelFilter, setModelFilter] = useState<string>('all');
   const [selectedRunForExecute, setSelectedRunForExecute] = useState<RunListItem | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const [refreshSuccess, setRefreshSuccess] = useState(false);
+
+  async function handleRefresh() {
+    setIsManualRefreshing(true);
+    const start = Date.now();
+    try {
+      await refetchRuns();
+      const elapsed = Date.now() - start;
+      if (elapsed < 500) await new Promise(r => setTimeout(r, 500 - elapsed));
+    } finally {
+      setIsManualRefreshing(false);
+      setRefreshSuccess(true);
+      setTimeout(() => setRefreshSuccess(false), 2000);
+    }
+  }
 
   // Queries
   const {
@@ -183,15 +200,24 @@ export function Training() {
 
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => refetchRuns()}
-            disabled={isRefetchingRuns}
-            className="px-3 py-2 text-xs font-medium text-text-muted hover:text-text-primary border border-border rounded-lg bg-surface hover:bg-surface-2 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            onClick={handleRefresh}
+            disabled={isRefetchingRuns || isManualRefreshing}
+            className="px-3.5 py-2 text-xs font-bold text-gray-200 hover:text-white border border-white/15 rounded-xl bg-white/5 hover:bg-white/10 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
             title="Refresh runs"
           >
-            <RefreshCw
-              className={`w-3.5 h-3.5 ${isRefetchingRuns ? 'animate-spin text-accent-blue' : ''}`}
-            />
-            <span>Refresh</span>
+            {refreshSuccess ? (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-emerald-300">Updated!</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${isRefetchingRuns || isManualRefreshing ? 'animate-spin text-purple-300' : ''}`}
+                />
+                <span>{isRefetchingRuns || isManualRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -307,9 +333,12 @@ export function Training() {
 
             {/* Results Count Bar */}
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/60 text-xs text-text-muted">
-              <span>
-                Showing <strong className="text-text-primary">{filteredRuns.length}</strong> of{' '}
-                <strong className="text-text-primary">{runs.length}</strong> runs
+              <span className="flex items-center gap-1.5 flex-wrap">
+                <span>Showing</span>
+                <strong className="text-text-primary font-semibold px-0.5">{filteredRuns.length}</strong>
+                <span>of</span>
+                <strong className="text-text-primary font-semibold px-0.5">{runs.length}</strong>
+                <span>runs</span>
               </span>
               {hasActiveFilters && (
                 <span className="text-accent-blue font-medium">Filtered results</span>

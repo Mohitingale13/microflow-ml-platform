@@ -3,6 +3,7 @@
  * Reuses the existing useHealth() hook.
  */
 
+import { useState } from 'react';
 import { CheckCircle2, XCircle, AlertCircle, RefreshCw, Server, Database, Wifi, HardDrive } from 'lucide-react';
 import { useHealth } from '@/hooks/useHealth';
 
@@ -41,6 +42,22 @@ function StatusIndicator({ ok }: { ok: boolean }) {
 
 export function PlatformHealth() {
   const { data: health, isLoading, isError, refetch, isRefetching } = useHealth();
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const [refreshSuccess, setRefreshSuccess] = useState(false);
+
+  async function handleRefresh() {
+    setIsManualRefreshing(true);
+    const start = Date.now();
+    try {
+      await refetch();
+      const elapsed = Date.now() - start;
+      if (elapsed < 500) await new Promise(r => setTimeout(r, 500 - elapsed));
+    } finally {
+      setIsManualRefreshing(false);
+      setRefreshSuccess(true);
+      setTimeout(() => setRefreshSuccess(false), 2000);
+    }
+  }
 
   const isHealthy = !!health && !isError;
 
@@ -54,12 +71,21 @@ export function PlatformHealth() {
         <div className="flex items-center gap-3">
           <StatusIndicator ok={isHealthy} />
           <button
-            onClick={() => refetch()}
-            disabled={isRefetching}
-            className="btn btn-outline text-xs flex items-center gap-1.5"
+            onClick={handleRefresh}
+            disabled={isRefetching || isManualRefreshing}
+            className="px-3.5 py-1.5 text-xs font-bold text-gray-200 hover:text-white border border-white/15 rounded-xl bg-white/5 hover:bg-white/10 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw size={12} className={isRefetching ? 'animate-spin' : ''} />
-            Refresh
+            {refreshSuccess ? (
+              <>
+                <CheckCircle2 size={13} className="text-emerald-400" />
+                <span className="text-emerald-300 font-bold">Checked!</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw size={12} className={isRefetching || isManualRefreshing ? 'animate-spin text-purple-300' : ''} />
+                <span>{isRefetching || isManualRefreshing ? 'Checking...' : 'Refresh'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>

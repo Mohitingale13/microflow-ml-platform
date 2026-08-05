@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Brain, TrendingUp, AlertTriangle, GitCompare, Lightbulb, RefreshCw, Clock, Cpu } from 'lucide-react';
+import { Sparkles, Brain, TrendingUp, AlertTriangle, GitCompare, Lightbulb, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { useGenerateAIReview } from '../../hooks/useAIReview';
 import type { AIReviewResponse } from '../../types/ai.types';
 
@@ -12,46 +12,31 @@ interface AIReviewCardProps {
 
 function ReviewSkeleton() {
   return (
-    <div className="space-y-4 animate-pulse">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-5">
-          <div className="h-3 w-32 rounded bg-white/10 mb-3" />
-          <div className="space-y-2">
-            <div className="h-3 w-full rounded bg-white/10" />
-            <div className="h-3 w-5/6 rounded bg-white/10" />
-            <div className="h-3 w-4/6 rounded bg-white/10" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Individual review section ─────────────────────────────────────────────
-
-interface SectionProps {
-  icon: React.ReactNode;
-  title: string;
-  content: string;
-  accent?: string;
-}
-
-function ReviewSection({ icon, title, content, accent = 'text-blue-400' }: SectionProps) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-5 transition-all hover:bg-white/[0.07]">
-      <div className={`flex items-center gap-2 mb-3 ${accent}`}>
-        <span className="shrink-0">{icon}</span>
-        <p className="text-[10px] uppercase tracking-[0.2em] font-semibold">{title}</p>
+    <div className="space-y-4 animate-pulse p-4">
+      <div className="h-24 rounded-xl border border-white/10 bg-white/5 p-5" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="h-32 rounded-xl border border-white/10 bg-white/5" />
+        <div className="h-32 rounded-xl border border-white/10 bg-white/5" />
+        <div className="h-32 rounded-xl border border-white/10 bg-white/5" />
       </div>
-      <p className="text-sm text-gray-300 leading-relaxed">{content}</p>
     </div>
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+function cleanSentence(text: string | undefined, maxLen = 140): string {
+  if (!text) return 'None detected.';
+  let cleaned = text.replace(/^(Overall|Strength|Weakness|Recommendation|Comparison)[:-]\s*/i, '');
+  const match = cleaned.match(/^.*?\.(?=\s|$)/);
+  if (match && match[0].length > 20 && match[0].length <= maxLen) return match[0].trim();
+  if (cleaned.length <= maxLen) return cleaned;
+  return cleaned.substring(0, maxLen).trim() + '...';
+}
+
+// ─── Main component (Linear / Vercel Developer-First Redesign) ───────────────
 
 export function AIReviewCard({ runId, runStatus }: AIReviewCardProps) {
   const [review, setReview] = useState<AIReviewResponse | null>(null);
+  const [showFullReview, setShowFullReview] = useState<boolean>(false);
   const mutation = useGenerateAIReview(runId);
 
   const isCompleted = runStatus === 'completed';
@@ -63,7 +48,7 @@ export function AIReviewCard({ runId, runStatus }: AIReviewCardProps) {
         setReview(result.data);
       }
     } catch {
-      // Error is handled via mutation.isError
+      // Error handled via mutation.isError
     }
   };
 
@@ -72,147 +57,195 @@ export function AIReviewCard({ runId, runStatus }: AIReviewCardProps) {
     setReview(null);
   };
 
-  // ── Not available for non-completed runs ─────────────────────────────────
   if (!isCompleted) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-        <Sparkles className="mx-auto mb-3 text-gray-600" size={28} />
-        <p className="text-sm text-gray-500">
-          AI Run Review is only available for completed runs.
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center shadow-sm">
+        <Sparkles className="mx-auto mb-3 text-gray-500 w-7 h-7" />
+        <p className="text-sm font-medium text-gray-400">
+          AI Run Diagnostics & Engineering Reviews are available once the run finishes executing.
         </p>
       </div>
     );
   }
 
-  // ── Generate button (initial state) ─────────────────────────────────────
+  // Initial prompt button
   if (!review && !mutation.isPending && !mutation.isError) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30">
-          <Sparkles className="text-purple-400" size={24} />
+      <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-transparent p-7 text-center shadow-lg">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-500/20 border border-purple-400/40 shadow-md">
+          <Sparkles className="text-purple-400 w-6 h-6" />
         </div>
-        <h3 className="text-base font-semibold text-white mb-2">AI Run Review</h3>
-        <p className="text-sm text-gray-400 mb-6 max-w-sm mx-auto leading-relaxed">
-          Generate a professional ML engineer review of this run — including strengths, weaknesses, comparison to the best run, and a recommended next experiment.
+        <h3 className="text-base font-bold text-white mb-1.5 uppercase tracking-wider">AI Run Diagnostics</h3>
+        <p className="text-sm text-gray-300 mb-6 max-w-md mx-auto leading-relaxed font-medium">
+          Generate an instant ML engineer diagnostic: spot bottleneck oscillations, compare against the current best baseline, and get actionable parameter tweaks.
         </p>
         <button
           id="generate-ai-review-btn"
           onClick={handleGenerate}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:from-purple-500 hover:to-blue-500 transition-all duration-200 shadow-lg shadow-purple-500/20"
+          className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-7 py-3 text-sm font-extrabold text-white hover:from-purple-500 hover:to-blue-500 transition-all duration-200 shadow-xl shadow-purple-500/30 cursor-pointer"
         >
-          <Sparkles size={15} />
-          Generate AI Review
+          <Sparkles size={16} />
+          Evaluate Run Intelligence
         </button>
       </div>
     );
   }
 
-  // ── Skeleton loading ─────────────────────────────────────────────────────
   if (mutation.isPending) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Brain className="text-purple-400 animate-pulse" size={18} />
-          <p className="text-sm text-gray-400">AI is reviewing this run…</p>
+        <div className="flex items-center gap-3 bg-purple-500/15 border border-purple-500/30 rounded-2xl p-4 text-sm text-purple-200 font-bold">
+          <Brain className="text-purple-400 animate-spin shrink-0 w-5 h-5" />
+          <span>MicroFlow AI is analyzing convergence curves, hyperparameter interactions, and run latency...</span>
         </div>
         <ReviewSkeleton />
       </div>
     );
   }
 
-  // ── Error state ──────────────────────────────────────────────────────────
   if (mutation.isError || (!review && !mutation.isPending)) {
     const errorMessage = mutation.error instanceof Error
       ? mutation.error.message
-      : 'An unexpected error occurred while generating the review.';
+      : 'An unexpected error occurred while diagnosing run.';
 
     return (
-      <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-6 text-center">
-        <AlertTriangle className="mx-auto mb-3 text-red-400" size={28} />
-        <p className="text-sm font-medium text-red-400 mb-1">Review Generation Failed</p>
-        <p className="text-xs text-gray-500 mb-5 max-w-sm mx-auto">{errorMessage}</p>
+      <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center shadow-lg">
+        <AlertTriangle className="mx-auto mb-3 text-red-400 w-8 h-8" />
+        <p className="text-base font-bold text-red-300 mb-1">Diagnostic Evaluation Failed</p>
+        <p className="text-sm text-gray-300 mb-5 max-w-sm mx-auto">{errorMessage}</p>
         <button
           id="retry-ai-review-btn"
           onClick={handleRetry}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm font-medium text-white hover:bg-white/10 transition-all"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-2.5 text-sm font-bold text-white hover:bg-white/20 transition-all cursor-pointer"
         >
-          <RefreshCw size={13} />
-          Retry
+          <RefreshCw size={14} />
+          Retry Diagnostic
         </button>
       </div>
     );
   }
 
-  // ── Full review card ─────────────────────────────────────────────────────
   if (!review) return null;
 
-  const formattedDate = new Date(review.generated_at).toLocaleString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
+  const punchyStrength = cleanSentence(review.strengths, 120);
+  const punchyWeakness = cleanSentence(review.weaknesses, 120);
+  const punchyComparison = cleanSentence(review.comparison, 120);
 
   return (
-    <div className="space-y-3">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Sparkles className="text-purple-400" size={16} />
-          <span className="text-sm font-semibold text-white">AI Run Review</span>
+    <div className="space-y-5 rounded-2xl border border-purple-500/40 bg-gradient-to-br from-purple-500/15 via-black/40 to-transparent p-6 shadow-2xl">
+      
+      {/* Top Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center gap-2.5">
+          <Sparkles className="text-purple-400 w-5 h-5" />
+          <span className="text-base font-bold text-white uppercase tracking-wide">AI Engineering Diagnostics</span>
         </div>
         <button
           id="regenerate-ai-review-btn"
           onClick={handleRetry}
-          title="Generate a new review"
-          className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+          title="Re-evaluate run metrics"
+          className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-all cursor-pointer shadow-sm"
         >
-          <RefreshCw size={11} />
-          Regenerate
+          <RefreshCw size={13} />
+          Re-evaluate
         </button>
       </div>
 
-      {/* Review sections */}
-      <ReviewSection
-        icon={<Brain size={14} />}
-        title="Overall Assessment"
-        content={review.overall_assessment}
-        accent="text-purple-400"
-      />
-      <ReviewSection
-        icon={<TrendingUp size={14} />}
-        title="Strengths"
-        content={review.strengths}
-        accent="text-green-400"
-      />
-      <ReviewSection
-        icon={<AlertTriangle size={14} />}
-        title="Weaknesses"
-        content={review.weaknesses}
-        accent="text-yellow-400"
-      />
-      <ReviewSection
-        icon={<GitCompare size={14} />}
-        title="Comparison"
-        content={review.comparison}
-        accent="text-blue-400"
-      />
-      <ReviewSection
-        icon={<Lightbulb size={14} />}
-        title="Recommendation"
-        content={review.recommendation}
-        accent="text-orange-400"
-      />
-
-      {/* Footer metadata */}
-      <div className="mt-2 flex flex-wrap items-center gap-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-        <div className="flex items-center gap-1.5 text-[10px] text-gray-500">
-          <Clock size={11} />
-          <span>{formattedDate}</span>
+      {/* Hero Action Recommendation Box */}
+      <div className="bg-black/50 border border-purple-500/40 rounded-xl p-5 shadow-inner flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1.5 flex-1">
+          <span className="text-[11px] font-black tracking-widest uppercase text-purple-300 bg-purple-500/20 px-2.5 py-0.5 rounded border border-purple-400/30 inline-block">
+            Recommended Action
+          </span>
+          <div className="text-base sm:text-lg font-bold text-white leading-snug">
+            {review.recommendation}
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-gray-500">
-          <Cpu size={11} />
-          <span>Source of Truth</span>
+        <div className="shrink-0 bg-white/[0.04] border border-white/10 rounded-lg p-3.5 max-w-xs text-xs text-gray-300 font-medium">
+          <span className="font-extrabold text-white block mb-1 uppercase text-[10px] tracking-wider flex items-center gap-1">
+            <Lightbulb size={13} className="text-amber-400" /> Assessment Focus:
+          </span>
+          {cleanSentence(review.overall_assessment, 130)}
         </div>
       </div>
+
+      {/* 3-Column Concise Scannable Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+        
+        {/* Strength */}
+        <div className="rounded-xl border border-white/15 bg-white/[0.04] p-4 flex flex-col justify-between shadow-md hover:bg-white/[0.07] transition-all">
+          <div className="space-y-1.5">
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <TrendingUp size={15} className="text-emerald-400" /> Observed Gains
+            </span>
+            <p className="text-xs sm:text-sm font-medium text-gray-200 leading-relaxed">
+              {punchyStrength}
+            </p>
+          </div>
+        </div>
+
+        {/* Weakness */}
+        <div className="rounded-xl border border-white/15 bg-white/[0.04] p-4 flex flex-col justify-between shadow-md hover:bg-white/[0.07] transition-all">
+          <div className="space-y-1.5">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              <AlertTriangle size={15} className="text-amber-400" /> Bottlenecks & Risks
+            </span>
+            <p className="text-xs sm:text-sm font-medium text-gray-200 leading-relaxed">
+              {punchyWeakness}
+            </p>
+          </div>
+        </div>
+
+        {/* Comparison */}
+        <div className="rounded-xl border border-white/15 bg-white/[0.04] p-4 flex flex-col justify-between shadow-md hover:bg-white/[0.07] transition-all">
+          <div className="space-y-1.5">
+            <span className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+              <GitCompare size={15} className="text-blue-400" /> Vs. Baseline Benchmark
+            </span>
+            <p className="text-xs sm:text-sm font-medium text-gray-200 leading-relaxed">
+              {punchyComparison}
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Toggle Complete Review Drawer */}
+      <div className="flex justify-center pt-3">
+        <button
+          onClick={() => setShowFullReview(!showFullReview)}
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-white/20 bg-white/10 text-xs sm:text-sm font-bold text-gray-200 hover:text-white hover:bg-white/15 transition-all shadow-md cursor-pointer"
+        >
+          <span>{showFullReview ? 'Hide Complete Diagnostic Log' : 'Show Complete Diagnostic Log'}</span>
+          {showFullReview ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+        </button>
+      </div>
+
+      {showFullReview && (
+        <div className="pt-5 border-t border-white/15 space-y-4 animate-in slide-in-from-top-2 duration-200 text-sm">
+          <div className="bg-black/40 border border-white/15 rounded-xl p-5 space-y-4">
+            <div>
+              <span className="text-xs font-extrabold uppercase text-gray-400 tracking-wider block mb-1">Full Overall Assessment:</span>
+              <p className="text-gray-200 leading-relaxed font-normal">{review.overall_assessment}</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-white/10">
+              <div>
+                <span className="text-xs font-extrabold uppercase text-emerald-400 tracking-wider block mb-1">All Strengths:</span>
+                <p className="text-gray-200 leading-relaxed font-normal">{review.strengths}</p>
+              </div>
+              <div>
+                <span className="text-xs font-extrabold uppercase text-amber-400 tracking-wider block mb-1">All Weaknesses:</span>
+                <p className="text-gray-200 leading-relaxed font-normal">{review.weaknesses}</p>
+              </div>
+            </div>
+            <div className="pt-3 border-t border-white/10">
+              <span className="text-xs font-extrabold uppercase text-blue-400 tracking-wider block mb-1">Detailed Champion Comparison:</span>
+              <p className="text-gray-200 leading-relaxed font-normal">{review.comparison}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

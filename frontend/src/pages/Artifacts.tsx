@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -16,6 +16,7 @@ import {
   FlaskConical,
   Database,
   X,
+  CheckCircle2,
 } from 'lucide-react';
 import { useArtifacts, useArtifactStats } from '@/hooks/useArtifacts';
 import { useExperiments, useRuns } from '@/hooks/useExperiments';
@@ -43,6 +44,29 @@ export function Artifacts() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [experimentFilter, setExperimentFilter] = useState<string>('all');
   const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const [refreshSuccess, setRefreshSuccess] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 50;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, typeFilter, experimentFilter]);
+
+  async function handleRefresh() {
+    setIsManualRefreshing(true);
+    const start = Date.now();
+    try {
+      await refetchArtifacts();
+      const elapsed = Date.now() - start;
+      if (elapsed < 500) await new Promise(r => setTimeout(r, 500 - elapsed));
+    } finally {
+      setIsManualRefreshing(false);
+      setRefreshSuccess(true);
+      setTimeout(() => setRefreshSuccess(false), 2000);
+    }
+  }
 
   // Queries
   const {
@@ -66,9 +90,9 @@ export function Artifacts() {
   const runsMap = useMemo(() => new Map(runs.map((r) => [r.id, r])), [runs]);
   const datasetsMap = useMemo(() => new Map(datasets.map((d) => [d.id, d])), [datasets]);
 
-  // Filtered artifacts
+  // Filtered and sorted (latest first) artifacts
   const filteredArtifacts = useMemo(() => {
-    return artifacts.filter((art) => {
+    const list = artifacts.filter((art) => {
       // Type filter
       if (typeFilter !== 'all' && art.artifact_type !== typeFilter) {
         return false;
@@ -103,12 +127,23 @@ export function Artifacts() {
 
       return true;
     });
+
+    return list.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
   }, [artifacts, typeFilter, experimentFilter, searchTerm, experimentsMap, runsMap, datasetsMap]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredArtifacts.length / pageSize));
+  const validPage = Math.min(currentPage, totalPages);
+
+  const paginatedArtifacts = useMemo(() => {
+    const start = (validPage - 1) * pageSize;
+    return filteredArtifacts.slice(start, start + pageSize);
+  }, [filteredArtifacts, validPage, pageSize]);
 
   const clearFilters = () => {
     setSearchTerm('');
     setTypeFilter('all');
     setExperimentFilter('all');
+    setCurrentPage(1);
   };
 
   const hasActiveFilters =
@@ -143,15 +178,24 @@ export function Artifacts() {
 
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => refetchArtifacts()}
-            disabled={isRefetchingArtifacts}
-            className="px-3 py-2 text-xs font-medium text-text-muted hover:text-text-primary border border-border rounded-lg bg-surface hover:bg-surface-2 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            onClick={handleRefresh}
+            disabled={isRefetchingArtifacts || isManualRefreshing}
+            className="px-3.5 py-2 text-xs font-bold text-gray-200 hover:text-white border border-white/15 rounded-xl bg-white/5 hover:bg-white/10 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
             title="Refresh artifacts"
           >
-            <RefreshCw
-              className={`w-3.5 h-3.5 ${isRefetchingArtifacts ? 'animate-spin text-accent-blue' : ''}`}
-            />
-            <span>Refresh</span>
+            {refreshSuccess ? (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-emerald-300">Updated!</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${isRefetchingArtifacts || isManualRefreshing ? 'animate-spin text-purple-300' : ''}`}
+                />
+                <span>{isRefetchingArtifacts || isManualRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -307,13 +351,24 @@ export function Artifacts() {
 
             {/* Results Count Bar */}
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/60 text-xs text-text-muted">
-              <span>
-                Showing <strong className="text-text-primary">{filteredArtifacts.length}</strong> of{' '}
-                <strong className="text-text-primary">{artifacts.length}</strong> artifacts
+              <span className="flex items-center gap-1.5 flex-wrap">
+                <span>Showing</span>
+                <strong className="text-text-primary font-semibold px-0.5">
+                  {filteredArtifacts.length > 0 ? (validPage - 1) * pageSize + 1 : 0} to {Math.min(validPage * pageSize, filteredArtifacts.length)}
+                </strong>
+                <span>of</span>
+                <strong className="text-text-primary font-semibold px-0.5">{filteredArtifacts.length}</strong>
+                <span>artifacts</span>
+                {artifacts.length !== filteredArtifacts.length && <span className="text-text-muted ml-1">(filtered from {artifacts.length})</span>}
               </span>
-              {hasActiveFilters && (
-                <span className="text-accent-blue font-medium">Filtered results</span>
-              )}
+              <div className="flex items-center gap-3">
+                {hasActiveFilters && (
+                  <span className="text-accent-blue font-medium">Filtered results</span>
+                )}
+                {totalPages > 1 && (
+                  <span className="text-text-muted font-mono">Page {validPage} of {totalPages}</span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -371,7 +426,7 @@ export function Artifacts() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border text-sm">
-                    {filteredArtifacts.map((art) => {
+                    {paginatedArtifacts.map((art) => {
                       const exp = experimentsMap.get(art.experiment_id);
                       const run = runsMap.get(art.run_id);
                       const dataset = datasetsMap.get(art.dataset_id);
@@ -504,6 +559,36 @@ export function Artifacts() {
                   </tbody>
                 </table>
               </div>
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-6 py-3.5 bg-surface-2/60 border-t border-border">
+                  <span className="flex items-center gap-1.5 flex-wrap text-xs text-text-muted">
+                    <span>Showing</span>
+                    <strong className="text-text-primary font-semibold px-0.5">{(validPage - 1) * pageSize + 1}</strong>
+                    <span>to</span>
+                    <strong className="text-text-primary font-semibold px-0.5">{Math.min(validPage * pageSize, filteredArtifacts.length)}</strong>
+                    <span>of</span>
+                    <strong className="text-text-primary font-semibold px-0.5">{filteredArtifacts.length}</strong>
+                    <span>entries</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={validPage === 1}
+                      className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-white/5 text-xs font-bold text-gray-200 hover:text-white hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={validPage === totalPages}
+                      className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-white/5 text-xs font-bold text-gray-200 hover:text-white hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </>

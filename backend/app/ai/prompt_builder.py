@@ -72,7 +72,7 @@ def build_review_prompt(
     # ── Best run metrics & deltas ─────────────────────────────────────────────
     is_best = best_run is None or (best_run and best_run.id == run.id)
 
-    if best_result and not is_best:
+    if best_result and best_run is not None and not is_best:
         b_acc   = _fmt_metric(best_result.accuracy)
         b_prec  = _fmt_metric(best_result.precision)
         b_f1    = _fmt_metric(best_result.f1_score)
