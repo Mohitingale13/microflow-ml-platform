@@ -13,6 +13,7 @@ import {
   FlaskConical,
   Database,
   TrendingUp,
+  CheckCircle2,
 } from 'lucide-react';
 import {
   useDatasetMetrics,
@@ -45,6 +46,8 @@ export function Metrics() {
   const [selectedDatasetId, setSelectedDatasetId] = useState<string>('all');
   const [selectedExperimentId, setSelectedExperimentId] = useState<string>('all');
   const [selectedModelType, setSelectedModelType] = useState<string>('all');
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const [refreshSuccess, setRefreshSuccess] = useState(false);
 
   // Queries
   const {
@@ -124,11 +127,23 @@ export function Metrics() {
     return list.filter((d: DatasetMetricSummary) => d.dataset_name.toLowerCase().includes(term));
   }, [rawDatasetMetrics, selectedDatasetId, searchTerm]);
 
-  const handleRefreshAll = () => {
-    refetchOverview();
-    refetchModels();
-    refetchExperiments();
-    refetchDatasets();
+  const handleRefreshAll = async () => {
+    setIsManualRefreshing(true);
+    const start = Date.now();
+    try {
+      await Promise.all([
+        refetchOverview(),
+        refetchModels(),
+        refetchExperiments(),
+        refetchDatasets(),
+      ]);
+      const elapsed = Date.now() - start;
+      if (elapsed < 500) await new Promise(r => setTimeout(r, 500 - elapsed));
+    } finally {
+      setIsManualRefreshing(false);
+      setRefreshSuccess(true);
+      setTimeout(() => setRefreshSuccess(false), 2000);
+    }
   };
 
   const handleClearFilters = () => {
@@ -162,11 +177,20 @@ export function Metrics() {
 
         <button
           onClick={handleRefreshAll}
-          disabled={isRefetchingOverview}
-          className="btn btn-outline text-xs self-start md:self-auto flex items-center gap-1.5"
+          disabled={isRefetchingOverview || isManualRefreshing}
+          className="px-3.5 py-2 text-xs font-bold text-gray-200 hover:text-white border border-white/15 rounded-xl bg-white/5 hover:bg-white/10 self-start md:self-auto flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
         >
-          <RefreshCw size={13} className={isRefetchingOverview ? 'animate-spin' : ''} />
-          <span>Refresh Data</span>
+          {refreshSuccess ? (
+            <>
+              <CheckCircle2 size={13} className="text-emerald-400" />
+              <span className="text-emerald-300 font-bold">Updated!</span>
+            </>
+          ) : (
+            <>
+              <RefreshCw size={13} className={isRefetchingOverview || isManualRefreshing ? 'animate-spin text-purple-300' : ''} />
+              <span>{isRefetchingOverview || isManualRefreshing ? 'Refreshing...' : 'Refresh Data'}</span>
+            </>
+          )}
         </button>
       </div>
 

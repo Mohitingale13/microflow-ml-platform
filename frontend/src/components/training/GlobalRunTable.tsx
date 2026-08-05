@@ -86,11 +86,11 @@ export function GlobalRunTable({
                 <th className="px-4 py-3.5">Dataset</th>
                 <th className="px-4 py-3.5">Model</th>
                 <th className="px-4 py-3.5">Status</th>
+                <th className="px-4 py-3.5 text-center">Actions</th>
                 <th className="px-4 py-3.5">Created</th>
                 <th className="px-4 py-3.5">Updated</th>
                 <th className="px-4 py-3.5">Duration</th>
                 <th className="px-4 py-3.5 text-center">Primary Metric</th>
-                <th className="px-4 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-sm">
@@ -165,31 +165,9 @@ export function GlobalRunTable({
                     <td className="px-4 py-3.5 whitespace-nowrap">
                       <RunStatusBadge status={run.status} size="sm" />
                     </td>
-
-                    {/* Created */}
-                    <td className="px-4 py-3.5 text-xs text-text-muted whitespace-nowrap">
-                      {formatDate(run.created_at)}
-                    </td>
-
-                    {/* Updated */}
-                    <td className="px-4 py-3.5 text-xs text-text-muted whitespace-nowrap">
-                      {formatDate(run.updated_at)}
-                    </td>
-
-                    {/* Duration */}
-                    <td className="px-4 py-3.5 text-xs font-mono text-text-secondary whitespace-nowrap">
-                      {formatDuration(run)}
-                    </td>
-
-                    {/* Primary Metric */}
-                    <td className="px-4 py-3.5 text-center text-xs font-mono text-text-muted">
-                      {/* Placeholder for future stored metrics */}
-                      —
-                    </td>
-
                     {/* Actions */}
-                    <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
+                      <div className="flex items-center justify-center gap-1.5">
                         {/* Execute Action */}
                         {isQueued && (
                           <button
@@ -246,6 +224,27 @@ export function GlobalRunTable({
                           <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
+                    </td>
+
+                    {/* Created */}
+                    <td className="px-4 py-3.5 text-xs text-text-muted whitespace-nowrap">
+                      {formatDate(run.created_at)}
+                    </td>
+
+                    {/* Updated */}
+                    <td className="px-4 py-3.5 text-xs text-text-muted whitespace-nowrap">
+                      {formatDate(run.updated_at)}
+                    </td>
+
+                    {/* Duration */}
+                    <td className="px-4 py-3.5 text-xs font-mono text-text-secondary whitespace-nowrap">
+                      {formatDuration(run)}
+                    </td>
+
+                    {/* Primary Metric */}
+                    <td className="px-4 py-3.5 text-center text-xs font-mono text-text-muted">
+                      {/* Placeholder for future stored metrics */}
+                      —
                     </td>
                   </tr>
                 );

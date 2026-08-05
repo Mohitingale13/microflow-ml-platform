@@ -19,6 +19,7 @@ import {
   FileCode,
   CheckCircle2,
   Timer,
+  Sparkles,
 } from 'lucide-react';
 import {
   useRun,
@@ -42,8 +43,9 @@ import { formatBytes, formatModelType } from '../utils/format';
 import { getArtifactDownloadUrl } from '../services/artifact.service';
 import type { EvaluationMetrics } from '../types/experiment.types';
 import type { Artifact } from '../types/artifact.types';
+import { AIReviewCard } from '../components/ai/AIReviewCard';
 
-type Tab = 'overview' | 'results' | 'artifacts' | 'configuration' | 'timeline' | 'metadata';
+type Tab = 'overview' | 'results' | 'ai-review' | 'artifacts' | 'configuration' | 'timeline' | 'metadata';
 
 const QUEUEABLE = ['draft'];
 const CANCELLABLE = ['draft', 'queued'];
@@ -144,6 +146,12 @@ export function RunDetail() {
       label: 'Evaluation Results',
       icon: <BarChart2 className="w-4 h-4" />,
       badge: effectiveMetrics ? 'Ready' : undefined,
+    },
+    {
+      id: 'ai-review',
+      label: 'AI Review',
+      icon: <Sparkles className="w-4 h-4 text-accent-purple" />,
+      badge: run?.status === 'completed' ? 'New' : undefined,
     },
     {
       id: 'artifacts',
@@ -271,26 +279,28 @@ export function RunDetail() {
       )}
 
       {/* Tabs */}
-      <div className="border-b border-border mb-6">
-        <div className="flex gap-0 overflow-x-auto">
+      <div className="mb-6 w-full overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-2 items-center min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 py-2 px-4 rounded-full text-sm font-medium transition-all whitespace-nowrap border ${
                 activeTab === tab.id
-                  ? 'border-accent-blue text-accent-blue'
-                  : 'border-transparent text-text-muted hover:text-text-primary'
+                  ? 'bg-surface-2 border-border text-text-primary shadow-sm'
+                  : 'bg-transparent border-transparent text-text-muted hover:bg-surface hover:text-text-primary hover:border-border/50'
               }`}
             >
-              {tab.icon}
+              <div className={activeTab === tab.id ? 'text-accent-blue' : ''}>
+                {tab.icon}
+              </div>
               <span>{tab.label}</span>
               {tab.badge !== undefined && (
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded font-mono font-semibold ${
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-accent-blue/20 text-accent-blue'
-                      : 'bg-surface-2 text-text-muted'
+                      ? 'bg-accent-blue/20 text-accent-blue border border-accent-blue/20'
+                      : 'bg-surface-2 text-text-muted border border-border/50'
                   }`}
                 >
                   {tab.badge}
@@ -508,6 +518,27 @@ export function RunDetail() {
               </h3>
               <p className="text-xs text-text-muted max-w-sm mx-auto">
                 Execute this run to train the model and generate persistent evaluation results.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* AI Review Tab */}
+      {activeTab === 'ai-review' && (
+        <div className="space-y-6">
+          {run?.status === 'completed' ? (
+            <div className="bg-surface border border-border rounded-xl p-6 shadow-sm">
+              <AIReviewCard runId={id!} runStatus={run.status} />
+            </div>
+          ) : (
+            <div className="p-12 bg-surface border border-border rounded-xl text-center">
+              <Sparkles className="w-10 h-10 text-text-muted mx-auto mb-3" />
+              <h3 className="text-sm font-semibold text-text-primary mb-1">
+                Run Not Completed
+              </h3>
+              <p className="text-xs text-text-muted max-w-sm mx-auto">
+                AI Reviews can only be generated for runs that have successfully completed training.
               </p>
             </div>
           )}

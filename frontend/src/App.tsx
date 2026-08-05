@@ -11,6 +11,7 @@ import { Training } from "@/pages/Training";
 import { Artifacts } from "@/pages/Artifacts";
 import { Metrics } from "@/pages/Metrics";
 import { Pipeline } from "@/pages/Pipeline";
+import { Assistant } from "@/pages/Assistant";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="artifacts" element={<Artifacts />} />
             <Route path="metrics" element={<Metrics />} />
             <Route path="pipeline" element={<Pipeline />} />
+            <Route path="assistant" element={<Assistant />} />
           </Route>
         </Routes>
       </BrowserRouter>

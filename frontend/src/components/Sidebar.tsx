@@ -7,6 +7,7 @@ import {
   Archive,
   BarChart3,
   GitBranch,
+  Sparkles,
 } from "lucide-react";
 
 interface NavItem {
@@ -17,6 +18,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", path: "/", icon: <LayoutDashboard size={18} /> },
+  { label: "Ask MicroFlow", path: "/assistant", icon: <Sparkles size={18} className="text-purple-500" /> },
   { label: "Datasets", path: "/datasets", icon: <Database size={18} /> },
   { label: "Experiments", path: "/experiments", icon: <FlaskConical size={18} /> },
   { label: "Training", path: "/training", icon: <Brain size={18} /> },

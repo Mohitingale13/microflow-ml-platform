@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, FlaskConical, Play, Settings2, Tag, Info,
-  LayoutGrid, Plus, Archive, Trash2, AlertCircle,
+  LayoutGrid, Plus, Archive, Trash2, AlertCircle, Sparkles,
 } from 'lucide-react';
 import { useExperiment, useExperimentRuns, useUpdateExperiment, useDeleteExperiment } from '../hooks/useExperiments';
 import { useDataset } from '../hooks/useDatasets';
@@ -10,10 +10,12 @@ import { RunTable } from '../components/experiments/RunTable';
 import { ConfigurationViewer } from '../components/experiments/ConfigurationViewer';
 import { ExperimentStatusBadge, RunStatusBadge } from '../components/experiments/RunStatusBadge';
 import { CreateRunModal } from '../components/experiments/CreateRunModal';
+import { CompareRunsDialog } from '../components/experiments/CompareRunsDialog';
 import { ConfirmationDialog } from '../components/common/ConfirmationDialog';
 import { TableSkeleton } from '../components/common/LoadingSkeleton';
+import { AIStrategyTab } from '../components/experiments/AIStrategyTab';
 
-type Tab = 'overview' | 'runs' | 'configuration' | 'metadata';
+type Tab = 'overview' | 'runs' | 'configuration' | 'metadata' | 'ai-strategy';
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('en-US', {
@@ -27,6 +29,7 @@ export function ExperimentDetail() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [isCreateRunOpen, setIsCreateRunOpen] = useState(false);
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -77,6 +80,7 @@ export function ExperimentDetail() {
     { id: 'runs',           label: 'Runs',           icon: <Play className="w-4 h-4" />, count: runs.length },
     { id: 'configuration',  label: 'Configuration',  icon: <Settings2 className="w-4 h-4" /> },
     { id: 'metadata',       label: 'Metadata',       icon: <Info className="w-4 h-4" /> },
+    { id: 'ai-strategy',    label: 'AI Strategy',    icon: <Sparkles className="w-4 h-4 text-indigo-400" /> },
   ];
 
   if (isLoading) {
@@ -135,7 +139,26 @@ export function ExperimentDetail() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {/* Compare Runs button — always visible, disabled when fewer than 2 completed runs */}
+          {(() => {
+            const completedCount = runs.filter((r) => r.status === 'completed').length;
+            const disabled = completedCount < 2;
+            return (
+              <div
+                title={disabled ? 'At least two completed runs are required to generate an AI comparison.' : 'Compare two completed runs with AI'}
+              >
+                <button
+                  id="compare-runs-btn"
+                  onClick={() => setIsCompareOpen(true)}
+                  disabled={disabled}
+                  className="px-3 py-2 text-sm font-medium text-accent-blue border border-accent-blue/20 bg-accent-blue/5 rounded hover:bg-accent-blue/10 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Compare Runs
+                </button>
+              </div>
+            );
+          })()}
           {experiment.status === 'draft' && (
             <button
               onClick={handleActivate}
@@ -169,28 +192,38 @@ export function ExperimentDetail() {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="border-b border-border mb-6">
-        <div className="flex gap-0 overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 py-3 px-4 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'border-accent-blue text-accent-blue'
-                  : 'border-transparent text-text-muted hover:text-text-primary'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-              {tab.count !== undefined && (
-                <span className="text-xs bg-surface-2 rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
-                  {tab.count}
+      {/* Tactile, Mobile-First Interactive Tab Buttons */}
+      <div className="mb-8">
+        <div className="flex flex-wrap sm:inline-flex items-center gap-2 p-2 bg-black/40 border border-white/15 rounded-2xl shadow-inner w-full sm:w-auto">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            const isAI = tab.id === 'ai-strategy';
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2.5 py-2.5 px-5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 shadow-sm whitespace-nowrap select-none cursor-pointer ${
+                  isActive
+                    ? isAI
+                      ? 'bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-300/40 ring-1 ring-white/20'
+                      : 'bg-white/20 text-white border border-white/30 shadow-md shadow-black/50'
+                    : 'bg-white/[0.04] text-gray-300 hover:text-white hover:bg-white/15 border border-white/10'
+                }`}
+              >
+                <span className={isActive && isAI ? 'text-indigo-200 animate-pulse' : 'text-gray-200'}>
+                  {tab.icon}
                 </span>
-              )}
-            </button>
-          ))}
+                <span className="tracking-wide">{tab.label}</span>
+                {tab.count !== undefined && (
+                  <span className={`text-xs rounded-full px-2.5 py-0.5 min-w-[24px] text-center font-mono font-extrabold ${
+                    isActive ? 'bg-black/60 text-white border border-white/20' : 'bg-black/40 text-gray-200 border border-white/10'
+                  }`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -280,7 +313,19 @@ export function ExperimentDetail() {
         </div>
       )}
 
-      {/* Modals */}
+      {activeTab === 'ai-strategy' && (
+        <AIStrategyTab experimentId={id!} />
+      )}
+
+      {/* Compare Runs Dialog */}
+      <CompareRunsDialog
+        isOpen={isCompareOpen}
+        onClose={() => setIsCompareOpen(false)}
+        experimentId={id!}
+        runs={runs}
+      />
+
+      {/* Create Run Modal */}
       <CreateRunModal
         isOpen={isCreateRunOpen}
         onClose={() => setIsCreateRunOpen(false)}

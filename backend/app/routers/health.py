@@ -11,7 +11,7 @@ router = APIRouter(tags=["health"])
 def health_check() -> ApiResponse:
     payload = HealthResponse(
         service="microflow-backend",
-        version="0.1.0",
+        version="1.0.0",
         status="healthy",
         environment=settings.ENVIRONMENT,
         timestamp=datetime.now(timezone.utc),

@@ -41,8 +41,12 @@ export function PreviewTable({ preview }: PreviewTableProps) {
     <div className="flex flex-col h-full border border-border rounded-lg overflow-hidden bg-surface">
       <div className="px-4 py-3 border-b border-border bg-surface-2 flex justify-between items-center">
         <h3 className="text-sm font-medium text-text-primary">Data Preview</h3>
-        <span className="text-xs text-text-muted">
-          Showing {preview.rows.length} of {preview.total_rows?.toLocaleString() ?? '?'} rows
+        <span className="flex items-center gap-1.5 flex-wrap text-xs text-text-muted">
+          <span>Showing</span>
+          <strong className="text-text-primary font-semibold px-0.5">{preview.rows.length}</strong>
+          <span>of</span>
+          <strong className="text-text-primary font-semibold px-0.5">{preview.total_rows?.toLocaleString() ?? '?'}</strong>
+          <span>rows</span>
         </span>
       </div>
       

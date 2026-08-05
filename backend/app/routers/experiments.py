@@ -120,3 +120,21 @@ def list_experiment_runs(
     runs = RunRepository().list_by_experiment(experiment_id, db)
     items = [RunListItem.model_validate(r).model_dump(mode="json") for r in runs]
     return ApiResponse.ok(data=items, message=f"{len(items)} run(s) found")
+
+
+# ── AI Experiment Strategy ─────────────────────────────────────────────────────
+
+
+@router.post("/{experiment_id}/strategy", response_model=ApiResponse)
+def generate_experiment_strategy(
+    experiment_id: str,
+    db: Session = Depends(get_db),
+) -> ApiResponse:
+    from app.services.experiment_strategy_service import ExperimentStrategyService
+
+    service = ExperimentStrategyService()
+    strategy = service.get_or_generate_strategy(experiment_id, db)
+    return ApiResponse.ok(
+        data=strategy.model_dump(mode="json"),
+        message="AI Experiment Strategy generated successfully" if not strategy.cached else "Cached experiment strategy retrieved.",
+    )

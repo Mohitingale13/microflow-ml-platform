@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Database, Table2, FileBarChart, HardDrive, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Trash2, Database, Table2, FileBarChart, HardDrive, AlertCircle, Sparkles } from 'lucide-react';
 import { formatBytes } from '@/utils/format';
 import { useDataset, useDatasetPreview, useDatasetStatistics, useDeleteDataset } from '../hooks/useDatasets';
 import { StatusBadge } from '../components/datasets/StatusBadge';
 import { PreviewTable } from '../components/datasets/PreviewTable';
 import { StatisticsPanel } from '../components/datasets/StatisticsPanel';
+import { AIInsightsTab } from '../components/datasets/AIInsightsTab';
 
 export function DatasetDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'schema' | 'preview' | 'statistics' | 'storage'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'schema' | 'preview' | 'statistics' | 'storage' | 'ai_insights'>('overview');
   
   const { data: dataset, isLoading, error } = useDataset(id!);
   const { data: preview, isLoading: isLoadingPreview, error: previewError } = useDatasetPreview(id!);
@@ -64,6 +65,7 @@ export function DatasetDetail() {
     { id: 'preview', label: 'Preview', icon: <Table2 className="w-4 h-4" /> },
     { id: 'statistics', label: 'Statistics', icon: <FileBarChart className="w-4 h-4" /> },
     { id: 'storage', label: 'Storage', icon: <HardDrive className="w-4 h-4" /> },
+    { id: 'ai_insights', label: '✨ AI Insights', icon: <Sparkles className="w-4 h-4 text-purple-400" /> },
   ] as const;
 
   return (
@@ -104,23 +106,31 @@ export function DatasetDetail() {
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex-none border-b border-border mb-6">
-        <div className="flex gap-6 overflow-x-auto">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 py-3 px-1 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'border-accent-blue text-accent-blue'
-                  : 'border-transparent text-text-muted hover:text-text-primary'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
+      {/* Tactile, Mobile-First Interactive Tab Buttons */}
+      <div className="mb-8 flex-none">
+        <div className="flex flex-wrap sm:inline-flex items-center gap-2 p-2 bg-black/40 border border-white/15 rounded-2xl shadow-inner w-full sm:w-auto">
+          {tabs.map(tab => {
+            const isActive = activeTab === tab.id;
+            const isAI = tab.id === 'ai_insights';
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2.5 py-2.5 px-5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 shadow-sm whitespace-nowrap select-none cursor-pointer ${
+                  isActive
+                    ? isAI
+                      ? 'bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 border border-purple-300/40 ring-1 ring-white/20'
+                      : 'bg-white/20 text-white border border-white/30 shadow-md shadow-black/50'
+                    : 'bg-white/[0.04] text-gray-300 hover:text-white hover:bg-white/15 border border-white/10'
+                }`}
+              >
+                <span className={isActive && isAI ? 'text-purple-200 animate-pulse' : 'text-gray-200'}>
+                  {tab.icon}
+                </span>
+                <span className="tracking-wide">{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -242,6 +252,10 @@ export function DatasetDetail() {
               </div>
             </div>
           </div>
+        )}
+
+        {activeTab === 'ai_insights' && (
+          <AIInsightsTab datasetId={id!} />
         )}
       </div>
     </div>

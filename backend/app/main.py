@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("MicroFlow backend starting — environment: %s", settings.ENVIRONMENT)
+    from app.db.session import engine
+    from app.db.base import Base
+    import app.models  # noqa: F401
+    Base.metadata.create_all(bind=engine)
     yield
     logger.info("MicroFlow backend shutting down")
 
@@ -26,7 +30,7 @@ def create_application() -> FastAPI:
     application = FastAPI(
         title="MicroFlow",
         description="ML Experimentation Platform for Computational Biology Workflows",
-        version="0.1.0",
+        version="1.0.0",
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
