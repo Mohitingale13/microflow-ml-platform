@@ -19,7 +19,12 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 MODEL_NAME = "gemini-3.6-flash"
-FALLBACK_MODELS = ["gemini-3.5-flash"]
+FALLBACK_MODELS = [
+    "gemini-3.5-flash",
+    "gemini-3-flash",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+]
 
 
 class GeminiService:
@@ -32,6 +37,7 @@ class GeminiService:
 
     def __init__(self) -> None:
         self._client: Optional[genai.Client] = None
+        self._model_cooldowns: dict[str, float] = {}
 
     def _get_client(self) -> genai.Client:
         """Configure the SDK with the API key from settings (once)."""
@@ -48,12 +54,20 @@ class GeminiService:
 
     def _generate_with_retry(self, prompt: str, operation_name: str) -> str:
         """
-        Executes generation against Gemini with automatic retries for 503 / 429
-        temporary traffic spikes, plus fallback model support.
+        Executes generation against Gemini with automatic retries for 503 / high demand
+        temporary traffic spikes, plus instant failover and smart cooldowns for quota limits.
         """
         client = self._get_client()
         max_attempts = 3
-        models_to_try = [MODEL_NAME] + FALLBACK_MODELS
+        all_models = [MODEL_NAME] + FALLBACK_MODELS
+
+        # Filter out models currently on cooldown from previous quota or rate limits
+        now = time.time()
+        models_to_try = [m for m in all_models if now >= self._model_cooldowns.get(m, 0)]
+        if not models_to_try:
+            # If all models are on cooldown, try them anyway so we don't deadlock if timers expire soon
+            models_to_try = all_models
+
         last_exc: Optional[Exception] = None
 
         for model in models_to_try:
@@ -75,20 +89,41 @@ class GeminiService:
                 except Exception as exc:
                     last_exc = exc
                     exc_str = str(exc).lower()
-                    # Check if error is a temporary demand spike or rate limit
+
+                    # 1) Instant Quota / Rate-Limit Failover (Zero sleep delay on 429 quota exhaustion)
+                    is_quota = (
+                        "429" in exc_str
+                        or "resource exhausted" in exc_str
+                        or "quota" in exc_str
+                        or "rate limit" in exc_str
+                        or ("limit" in exc_str and "0" in exc_str)
+                    )
+
+                    if is_quota:
+                        # Determine cooldown period: 6 hours for daily quota ceilings, 60s for minute RPM ceilings
+                        is_daily = "perday" in exc_str or "day" in exc_str or "daily" in exc_str
+                        cooldown_secs = 21600.0 if is_daily else 60.0
+                        self._model_cooldowns[model] = time.time() + cooldown_secs
+                        logger.warning(
+                            "Model %s hit quota/rate limit during [%s]. Placing on cooldown for %ds and failing over instantly in 0ms...",
+                            model,
+                            operation_name,
+                            int(cooldown_secs),
+                        )
+                        break  # Break attempt loop immediately to jump to next model with zero delay!
+
+                    # 2) Transient Server Spike (503 / High Demand / Timeout) -> exponential backoff retry
                     is_transient = (
                         "503" in exc_str
                         or "unavailable" in exc_str
                         or "high demand" in exc_str
-                        or "429" in exc_str
-                        or "resource exhausted" in exc_str
                         or "timeout" in exc_str
                     )
 
                     if is_transient and attempt < max_attempts:
                         backoff_seconds = 1.5 * (2 ** (attempt - 1))
                         logger.warning(
-                            "Transient Gemini error (%s) on [%s] (model %s, attempt %d/%d). "
+                            "Transient Gemini server spike (%s) on [%s] (model %s, attempt %d/%d). "
                             "Retrying in %.1f seconds...",
                             type(exc).__name__,
                             operation_name,
