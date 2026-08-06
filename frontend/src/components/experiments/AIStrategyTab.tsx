@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Sparkles, RefreshCw, AlertCircle, ChevronDown, ChevronUp, 
   TrendingUp, Sliders, AlertTriangle, ArrowRight, CheckCircle2 
@@ -91,7 +91,7 @@ function strVal(val: any): string {
 
 export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
   const [strategy, setStrategy] = useState<ExperimentStrategy | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showFullAnalysis, setShowFullAnalysis] = useState<boolean>(false);
 
@@ -112,9 +112,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
     }
   };
 
-  useEffect(() => {
-    fetchStrategy();
-  }, [experimentId]);
+
 
   // ── Loading State ─────────────────────────────────────────────────────────
   if (isLoading && !strategy) {
@@ -129,8 +127,30 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
     );
   }
 
+  // ── Initial Prompt State ──────────────────────────────────────────────────
+  if (!strategy && !isLoading && !error) {
+    return (
+      <div className="rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 to-transparent p-10 text-center shadow-lg max-w-3xl mx-auto my-6">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/20 border border-indigo-400/40 shadow-md">
+          <Sparkles className="text-indigo-400 w-7 h-7" />
+        </div>
+        <h3 className="text-lg font-extrabold text-white mb-2 uppercase tracking-wider">AI Experiment Strategy Co-Pilot</h3>
+        <p className="text-sm text-gray-300 mb-8 max-w-xl mx-auto leading-relaxed font-medium">
+          Synthesize an evidence-driven ML strategy from your historical run telemetry, dataset quality metrics, and search space coverage. Discover unexplored algorithm architectures and receive high-impact hyperparameter recommendations.
+        </p>
+        <button
+          onClick={fetchStrategy}
+          className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-3.5 text-sm font-extrabold text-white hover:from-indigo-500 hover:to-purple-500 transition-all duration-200 shadow-xl shadow-indigo-500/30 cursor-pointer"
+        >
+          <Sparkles size={18} />
+          Generate Experiment Strategy
+        </button>
+      </div>
+    );
+  }
+
   // ── Error State ───────────────────────────────────────────────────────────
-  if (error || (!strategy && !isLoading)) {
+  if (error) {
     return (
       <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-center max-w-xl mx-auto shadow-xl">
         <AlertCircle className="mx-auto mb-3 text-red-400 w-9 h-9" />

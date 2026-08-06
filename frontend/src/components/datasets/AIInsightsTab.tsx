@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Sparkles, RefreshCw, AlertCircle, ChevronDown, ChevronUp, 
   Target, CheckCircle2, ShieldAlert, BarChart2, Layers
@@ -58,7 +58,7 @@ function cleanItem(item: string, maxLen = 75): string {
 
 export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
   const [analysis, setAnalysis] = useState<DatasetAIAnalysis | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [showFullProfile, setShowFullProfile] = useState<boolean>(false);
 
@@ -79,9 +79,7 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
     }
   };
 
-  useEffect(() => {
-    fetchInsights();
-  }, [datasetId]);
+
 
   // ── Loading State ─────────────────────────────────────────────────────────
   if (isLoading && !analysis) {
@@ -96,8 +94,30 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
     );
   }
 
+  // ── Initial Prompt State ──────────────────────────────────────────────────
+  if (!analysis && !isLoading && !error) {
+    return (
+      <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-transparent p-10 text-center shadow-lg max-w-3xl mx-auto my-6">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/20 border border-purple-400/40 shadow-md">
+          <Sparkles className="text-purple-400 w-7 h-7" />
+        </div>
+        <h3 className="text-lg font-extrabold text-white mb-2 uppercase tracking-wider">AI Dataset Intelligence Audit</h3>
+        <p className="text-sm text-gray-300 mb-8 max-w-xl mx-auto leading-relaxed font-medium">
+          Run a comprehensive zero-hallucination pre-training audit on this dataset schema. Get an objective quality score, feature relevance diagnostics, algorithm suitability ratings, and actionable preprocessing recommendations.
+        </p>
+        <button
+          onClick={fetchInsights}
+          className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-3.5 text-sm font-extrabold text-white hover:from-purple-500 hover:to-blue-500 transition-all duration-200 shadow-xl shadow-purple-500/30 cursor-pointer"
+        >
+          <Sparkles size={18} />
+          Generate Dataset Intelligence
+        </button>
+      </div>
+    );
+  }
+
   // ── Error State ───────────────────────────────────────────────────────────
-  if (error || (!analysis && !isLoading)) {
+  if (error) {
     return (
       <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-center max-w-xl mx-auto shadow-xl">
         <AlertCircle className="mx-auto mb-3 text-red-400 w-9 h-9" />
