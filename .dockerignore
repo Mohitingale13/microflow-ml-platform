@@ -1,0 +1,18 @@
+# ─── Secrets & Environment Files ─────────────────────────────────────────────
+.env
+**/.env
+.env.*
+**/.env.*
+!**/.env.example
+
+# ─── Version Control & Cache ─────────────────────────────────────────────────
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.venv
+**/venv
+**/node_modules
+**/dist
+**/*.log
