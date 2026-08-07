@@ -20,7 +20,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("MicroFlow backend starting — environment: %s", settings.ENVIRONMENT)
     from app.db.session import engine
     from app.db.base import Base
+    from sqlalchemy import text
     import app.models  # noqa: F401
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            conn.commit()
+    except Exception as exc:
+        logger.warning("Could not execute CREATE EXTENSION vector on startup: %s", exc)
     Base.metadata.create_all(bind=engine)
     yield
     logger.info("MicroFlow backend shutting down")

@@ -29,6 +29,19 @@ def _fmt_config(config: dict[str, Any] | None) -> str:
     return ", ".join(parts) if parts else "default configuration"
 
 
+def _format_explainability_summary(summary: dict[str, Any] | None) -> str:
+    """Format the SHAP explainability summary into a readable block."""
+    if not summary:
+        return ""
+    top_features = ", ".join(summary.get("top_features", [])[:5])
+    return (
+        f"SHAP EXPLAINABILITY SUMMARY:\n"
+        f"- Top Predictive Features: {top_features}\n"
+        f"- Positive Drivers Count: {len(summary.get('positive_contributors', []))}\n"
+        f"- Negative Drivers Count: {len(summary.get('negative_contributors', []))}\n\n"
+    )
+
+
 def build_review_prompt(
     *,
     run: Any,
@@ -105,6 +118,11 @@ def build_review_prompt(
     # ── Training config ───────────────────────────────────────────────────────
     config_str = _fmt_config(run.training_configuration)
 
+    # ── Explainability info ───────────────────────────────────────────────────
+    explainability_section = ""
+    if run_result and getattr(run_result, "explainability_status", None) == "completed" and getattr(run_result, "explainability_summary", None):
+        explainability_section = _format_explainability_summary(getattr(run_result, "explainability_summary", None))
+
     # ── Prompt ────────────────────────────────────────────────────────────────
     prompt = f"""You are a senior ML engineer conducting a written peer review of a training run.
 
@@ -118,7 +136,7 @@ Objective: {experiment.objective or "Not specified"}
 Dataset: {dataset_info}
 
 RUN UNDER REVIEW
-Run number: {run.run_number}
+Experiment: {experiment.name} — Run #{run.run_number}
 Model: {run.model_type}
 Configuration: {config_str}
 Execution time: {exec_t}
@@ -129,7 +147,7 @@ Precision: {prec}
 Recall: {rec}
 F1 Score: {f1}
 ROC AUC: {roc}
-
+{explainability_section}
 EXPERIMENT CONTEXT
 {best_section}
 
@@ -222,6 +240,28 @@ def build_comparison_prompt(
     )
     b_cfg = _fmt_config(run_b.training_configuration)
 
+    # ── Explainability info ───────────────────────────────────────────────────
+    explainability_section = ""
+    def _format_explain(res):
+        if res and getattr(res, "explainability_status", None) == "completed" and getattr(res, "explainability_summary", None):
+            summary = res.explainability_summary
+            top_feats = ", ".join(summary.get("top_features", [])[:5])
+            pos_feats = ", ".join(summary.get("positive_contributors", [])[:3])
+            neg_feats = ", ".join(summary.get("negative_contributors", [])[:3])
+            return f"Top features: {top_feats} | Positive: {pos_feats} | Negative: {neg_feats}"
+        return "N/A"
+        
+    a_explain = _format_explain(result_a)
+    b_explain = _format_explain(result_b)
+    
+    if a_explain != "N/A" or b_explain != "N/A":
+        explainability_section = (
+            f"\nSHAP EXPLAINABILITY COMPARISON\n"
+            f"Run A: {a_explain}\n"
+            f"Run B: {b_explain}\n\n"
+            f"IMPORTANT: Use these computed SHAP features to explain how the model's focus shifted between runs.\n"
+        )
+
     # ── Deltas (B relative to A) ───────────────────────────────────────────────
     d_acc,  _ = _compute_delta(
         result_a.accuracy if result_a else None,
@@ -256,7 +296,7 @@ Objective: {experiment.objective or "Not specified"}
 Dataset: {dataset_info}
 
 RUN A (baseline)
-Run number: {run_a.run_number}
+Experiment: {experiment.name} — Run #{run_a.run_number} ({run_a.model_type})
 Model: {run_a.model_type or "N/A"}
 Configuration: {a_cfg}
 Accuracy: {a_acc}
@@ -267,7 +307,7 @@ ROC AUC: {a_roc}
 Execution time: {a_time}
 
 RUN B (challenger)
-Run number: {run_b.run_number}
+Experiment: {experiment.name} — Run #{run_b.run_number} ({run_b.model_type})
 Model: {run_b.model_type or "N/A"}
 Configuration: {b_cfg}
 Accuracy: {b_acc}
@@ -283,7 +323,7 @@ Precision delta: {d_prec}
 Recall delta: {d_rec}
 F1 Score delta: {d_f1}
 ROC AUC delta: {d_roc}
-
+{explainability_section}
 INSTRUCTIONS
 Respond with a single JSON object only. No preamble, no explanation outside JSON.
 Required fields:
@@ -327,6 +367,7 @@ SUPPORTED INTENTS (Whitelist):
   - "metrics": questions regarding evaluation numbers (accuracy, f1, precision, recall, roc auc, execution time).
   - "artifacts": questions regarding generated output files, registered models, plots, confusion matrices.
   - "models": questions focusing on ML algorithm types (Random Forest, XGBoost, Logistic Regression) or configurations.
+  - "explainability": questions regarding feature importance, SHAP values, top predictive features, influential variables, or model interpretation.
   - "training_history": historical trends, timeline of experiments, general execution activity.
   - "ai_reviews": inquiries about automated AI peer reviews of specific training runs.
   - "run_comparisons": comparing multiple runs or identifying differences between executions.
@@ -361,10 +402,11 @@ def build_assistant_prompt(
     intent: str,
     structured_data: str,
     context: list[dict[str, str]] | None = None,
+    semantic_documents: list[dict[str, Any]] | None = None,
 ) -> str:
     """
     Construct a prompt for Gemini to synthesize a professional engineering response
-    based exclusively on the repository-provided structured database records.
+    combining structured SQL database records with semantically retrieved pgvector documents.
     """
     history_lines = []
     if context:
@@ -374,12 +416,22 @@ def build_assistant_prompt(
             history_lines.append(f"{role}: {content}")
     history_str = "\n".join(history_lines) if history_lines else "No previous conversational context."
 
+    doc_blocks = []
+    if semantic_documents:
+        for idx, doc in enumerate(semantic_documents, start=1):
+            title = doc.get("title", f"Document #{idx}")
+            content = doc.get("content", "").strip()
+            doc_blocks.append(f"--- Document #{idx}: [{title}] ---\n{content}")
+    semantic_str = "\n\n".join(doc_blocks) if doc_blocks else "No relevant semantic knowledge documents were retrieved."
+
     prompt = f"""You are MicroFlow Assistant, a specialized machine learning platform AI answering engineering questions about ML experimentation data.
 
-CRITICAL ENGINEERING CONSTRAINTS:
-1. Ground Truth: Your response must rely strictly and entirely on the AUTHENTIC DATABASE RESULTS provided below. Never invent runs, hallucinate metrics, or guess parameter values. If data is missing or incomplete, state that explicitly.
-2. No Formatting Abuse: Never output markdown tables. Never output code blocks or raw SQL/Python code. Write in clear, concise, professional engineering full sentences and structured paragraphs.
-3. Tone: Maintain a formal, analytical ML software engineering tone.
+CRITICAL ENGINEERING CONSTRAINTS (HYBRID RAG):
+1. Ground Truth: Your response must rely strictly and entirely on the AUTHENTIC DATABASE RESULTS (Structured SQL Telemetry) and the SEMANTIC KNOWLEDGE BASE (Retrieved pgvector Documents) provided below. Never invent runs, hallucinate metrics, or guess parameter values.
+2. Conflict Resolution: If structured database metrics and retrieved semantic documents conflict, explicitly point out the conflict.
+3. Insufficient Evidence: If data is missing or evidence is insufficient to answer the question, explicitly state so rather than guessing.
+4. No Formatting Abuse: Never output markdown tables. Never output code blocks or raw SQL/Python code. Write in clear, concise, professional engineering full sentences and structured paragraphs.
+5. Tone: Maintain a formal, analytical ML software engineering tone.
 
 RECENT CONVERSATION CONTEXT:
 {history_str}
@@ -390,15 +442,18 @@ USER QUESTION:
 RESOLVED INTENT:
 {intent}
 
-AUTHENTIC DATABASE RESULTS (Source of Truth):
+AUTHENTIC DATABASE RESULTS (Structured Telemetry Source of Truth):
 {structured_data}
+
+SEMANTIC KNOWLEDGE BASE (Retrieved pgvector Narrative Documents):
+{semantic_str}
 
 INSTRUCTIONS:
 Respond with a single strict JSON object only. No preamble or commentary outside the JSON structure.
 Required format:
 {{
-  "answer": "A precise, direct engineering answer to the question in professional full sentences.",
-  "reasoning": "Clear analytical reasoning explaining why this outcome occurred or how the conclusion was derived directly from the provided results.",
+  "answer": "A precise, direct engineering answer to the question in professional full sentences grounded in both structured data and retrieved semantic context.",
+  "reasoning": "Clear analytical reasoning explaining why this outcome occurred or how the conclusion was derived directly from the provided structured results and semantic documents.",
   "supporting_data": "Key numerical metrics, run numbers, dataset counts, or hyperparameter details extracted from the database results supporting your answer.",
   "recommendation": "One concrete, actionable engineering recommendation for next steps (or 'No further action required' if not applicable)."
 }}"""

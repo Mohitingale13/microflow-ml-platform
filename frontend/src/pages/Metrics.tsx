@@ -178,7 +178,7 @@ export function Metrics() {
         <button
           onClick={handleRefreshAll}
           disabled={isRefetchingOverview || isManualRefreshing}
-          className="px-3.5 py-2 text-xs font-bold text-gray-200 hover:text-white border border-white/15 rounded-xl bg-white/5 hover:bg-white/10 self-start md:self-auto flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+          className="px-3.5 py-2 text-xs font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] rounded-xl bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-2)] self-start md:self-auto flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
         >
           {refreshSuccess ? (
             <>

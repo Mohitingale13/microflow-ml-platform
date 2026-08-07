@@ -106,6 +106,16 @@ class AIQueryRequest(BaseModel):
     context: list[ConversationMessage] | None = None
 
 
+class RetrievedSource(BaseModel):
+    """Retrieved semantic document source for RAG attribution."""
+
+    document_type: str
+    document_id: str
+    title: str
+    snippet: str
+    score: float | None = None
+
+
 class AIQueryResponse(BaseModel):
     """Public API response shape for a completed assistant query."""
 
@@ -119,6 +129,13 @@ class AIQueryResponse(BaseModel):
     model_name: str
     generated_at: datetime
     cached: bool
+    sources: list[RetrievedSource] = []
+
+    # Evaluation Metrics
+    context_relevance_score: float | None = None
+    faithfulness_score: float | None = None
+    answer_relevance_score: float | None = None
+    evaluation_reasoning: str | None = None
 
     model_config = {"from_attributes": True}
 

@@ -45,7 +45,7 @@ import type { EvaluationMetrics } from '../types/experiment.types';
 import type { Artifact } from '../types/artifact.types';
 import { AIReviewCard } from '../components/ai/AIReviewCard';
 
-type Tab = 'overview' | 'results' | 'ai-review' | 'artifacts' | 'configuration' | 'timeline' | 'metadata';
+type Tab = 'overview' | 'results' | 'explainability' | 'ai-review' | 'artifacts' | 'configuration' | 'timeline' | 'metadata';
 
 const QUEUEABLE = ['draft'];
 const CANCELLABLE = ['draft', 'queued'];
@@ -146,6 +146,12 @@ export function RunDetail() {
       label: 'Evaluation Results',
       icon: <BarChart2 className="w-4 h-4" />,
       badge: effectiveMetrics ? 'Ready' : undefined,
+    },
+    {
+      id: 'explainability',
+      label: 'Explainability',
+      icon: <Eye className="w-4 h-4 text-accent-emerald" />,
+      badge: runResult?.explainability_status === 'completed' ? 'SHAP' : runResult?.explainability_status === 'failed' ? 'Failed' : undefined,
     },
     {
       id: 'ai-review',
@@ -518,6 +524,72 @@ export function RunDetail() {
               </h3>
               <p className="text-xs text-text-muted max-w-sm mx-auto">
                 Execute this run to train the model and generate persistent evaluation results.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Explainability Tab */}
+      {activeTab === 'explainability' && (
+        <div className="space-y-6">
+          {runResult?.explainability_status === 'completed' ? (
+            <div className="space-y-6">
+              <div className="bg-surface border border-border rounded-xl p-6 shadow-sm">
+                 <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2"><Eye className="w-5 h-5 text-accent-emerald"/> SHAP Explainability Summary</h3>
+                 
+                 {runResult.explainability_summary && (
+                   <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                     <div className="p-4 bg-surface-2 rounded-lg border border-border overflow-hidden">
+                       <p className="text-xs text-text-muted mb-1">Top Feature</p>
+                       <p className="text-sm font-semibold font-mono text-text-primary truncate" title={(runResult.explainability_summary as any).top_features?.[0]}>{(runResult.explainability_summary as any).top_features?.[0]}</p>
+                     </div>
+                     <div className="p-4 bg-surface-2 rounded-lg border border-border">
+                       <p className="text-xs text-text-muted mb-1">Positive Drivers</p>
+                       <p className="text-sm font-semibold text-text-primary">{(runResult.explainability_summary as any).positive_contributors?.length || 0}</p>
+                     </div>
+                     <div className="p-4 bg-surface-2 rounded-lg border border-border">
+                       <p className="text-xs text-text-muted mb-1">Negative Drivers</p>
+                       <p className="text-sm font-semibold text-text-primary">{(runResult.explainability_summary as any).negative_contributors?.length || 0}</p>
+                     </div>
+                     <div className="p-4 bg-surface-2 rounded-lg border border-border">
+                       <p className="text-xs text-text-muted mb-1">Sample Size</p>
+                       <p className="text-sm font-semibold text-text-primary">{(runResult.explainability_summary as any).sample_size || 0}</p>
+                     </div>
+                   </div>
+                 )}
+
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                   {artifacts.filter(a => a.artifact_type.includes('png')).map(art => (
+                     <div key={art.id} className="border border-border rounded-lg p-3 bg-surface-2 flex flex-col">
+                       <div className="flex items-center justify-between mb-3">
+                         <p className="text-xs font-semibold text-text-primary flex items-center gap-2 truncate pr-2">
+                           <BarChart2 className="w-4 h-4 text-text-muted shrink-0"/> <span className="truncate">{art.filename}</span>
+                         </p>
+                         <a href={getArtifactDownloadUrl(art.id)} target="_blank" rel="noreferrer" className="text-text-muted hover:text-text-primary shrink-0">
+                           <Download className="w-4 h-4" />
+                         </a>
+                       </div>
+                       <div className="flex-1 bg-white rounded flex items-center justify-center p-2 overflow-hidden border border-border/50">
+                         <img src={getArtifactDownloadUrl(art.id)} alt={art.filename} className="max-w-full max-h-96 object-contain" loading="lazy" />
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+              </div>
+            </div>
+          ) : runResult?.explainability_status === 'failed' ? (
+             <div className="p-6 sm:p-12 bg-red-500/10 border border-red-500/20 rounded-xl text-center">
+              <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+              <h3 className="text-sm font-semibold text-red-400 mb-1">Explainability Failed</h3>
+              <p className="text-xs text-red-400/80 max-w-md mx-auto">{runResult.explainability_error}</p>
+            </div>
+          ) : (
+            <div className="p-6 sm:p-12 bg-surface border border-border rounded-xl text-center">
+              <Eye className="w-10 h-10 text-text-muted mx-auto mb-3" />
+              <h3 className="text-sm font-semibold text-text-primary mb-1">Not Generated</h3>
+              <p className="text-xs text-text-muted max-w-sm mx-auto">
+                SHAP explanations are computed automatically after successful model evaluation.
               </p>
             </div>
           )}

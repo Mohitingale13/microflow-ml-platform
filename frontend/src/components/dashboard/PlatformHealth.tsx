@@ -73,7 +73,7 @@ export function PlatformHealth() {
           <button
             onClick={handleRefresh}
             disabled={isRefetching || isManualRefreshing}
-            className="px-3.5 py-1.5 text-xs font-bold text-gray-200 hover:text-white border border-white/15 rounded-xl bg-white/5 hover:bg-white/10 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+            className="px-3.5 py-1.5 text-xs font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] rounded-xl bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-2)] flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
           >
             {refreshSuccess ? (
               <>

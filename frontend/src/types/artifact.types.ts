@@ -6,7 +6,13 @@ export type ArtifactType =
   | 'evaluation_json'
   | 'confusion_matrix_json'
   | 'configuration_json'
-  | 'preprocessing_json';
+  | 'preprocessing_json'
+  | 'shap_summary_png'
+  | 'feature_importance_png'
+  | 'shap_dependence_png'
+  | 'shap_values_json'
+  | 'feature_importance_json'
+  | 'explainability_summary_json';
 
 export interface Artifact {
   id: string;
@@ -41,6 +47,9 @@ export interface RunResult {
   dataset_id: string | null;
   training_config_snapshot: Record<string, unknown> | null;
   preprocessing_summary: Record<string, unknown> | null;
+  explainability_status: string | null;
+  explainability_error: string | null;
+  explainability_summary: Record<string, unknown> | null;
   created_at: string;
 }
 

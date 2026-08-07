@@ -259,4 +259,10 @@ class RunComparisonService:
             next_recommendation=content.next_recommendation,
         )
 
+        try:
+            from app.services.embedding_service import EmbeddingService
+            EmbeddingService(gemini_service=self._gemini).index_ai_comparison(db, record, run_a, run_b, experiment)
+        except Exception as exc:
+            logger.warning("Embedding indexing failed for AI Comparison %s: %s", record.id, exc)
+
         return _to_response(record, metric_deltas, cached=False)

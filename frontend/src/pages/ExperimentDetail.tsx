@@ -194,7 +194,7 @@ export function ExperimentDetail() {
 
       {/* Tactile, Mobile-First Interactive Tab Buttons */}
       <div className="mb-8">
-        <div className="flex flex-wrap sm:inline-flex items-center gap-2 p-2 bg-black/40 border border-white/15 rounded-2xl shadow-inner w-full sm:w-auto">
+        <div className="flex flex-wrap sm:inline-flex items-center gap-2 p-2 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl w-full sm:w-auto">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const isAI = tab.id === 'ai-strategy';
@@ -202,21 +202,21 @@ export function ExperimentDetail() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2.5 py-2.5 px-5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 shadow-sm whitespace-nowrap select-none cursor-pointer ${
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2.5 py-2.5 px-5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 whitespace-nowrap select-none cursor-pointer ${
                   isActive
                     ? isAI
-                      ? 'bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/30 border border-indigo-300/40 ring-1 ring-white/20'
-                      : 'bg-white/20 text-white border border-white/30 shadow-md shadow-black/50'
-                    : 'bg-white/[0.04] text-gray-300 hover:text-white hover:bg-white/15 border border-white/10'
+                      ? 'bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 text-white shadow-md border border-indigo-300/40'
+                      : 'bg-[var(--color-surface)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-sm'
+                    : 'bg-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] border border-transparent'
                 }`}
               >
-                <span className={isActive && isAI ? 'text-indigo-200 animate-pulse' : 'text-gray-200'}>
+                <span className={isActive && isAI ? 'text-indigo-200 animate-pulse' : 'text-inherit opacity-80'}>
                   {tab.icon}
                 </span>
                 <span className="tracking-wide">{tab.label}</span>
                 {tab.count !== undefined && (
                   <span className={`text-xs rounded-full px-2.5 py-0.5 min-w-[24px] text-center font-mono font-extrabold ${
-                    isActive ? 'bg-black/60 text-white border border-white/20' : 'bg-black/40 text-gray-200 border border-white/10'
+                    isActive ? 'bg-[var(--color-surface)] text-[var(--color-text-primary)] border border-[var(--color-border)]' : 'bg-[var(--color-surface-2)] text-[var(--color-text-secondary)] border border-transparent'
                   }`}>
                     {tab.count}
                   </span>

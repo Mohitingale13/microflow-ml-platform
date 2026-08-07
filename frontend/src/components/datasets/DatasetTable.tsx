@@ -162,7 +162,7 @@ export function DatasetTable({ data, isLoading }: DatasetTableProps) {
                 <tr
                   key={row.id}
                   onClick={() => navigate(`/datasets/${row.original.id}`)}
-                  className="hover:bg-white/5 cursor-pointer transition-colors group"
+                  className="hover:bg-[var(--color-surface-2)] cursor-pointer transition-colors group"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-4 py-3 align-middle">

@@ -28,6 +28,9 @@ class RunResultResponse(BaseModel):
     dataset_id: str | None
     training_config_snapshot: dict[str, Any] | None
     preprocessing_summary: dict[str, Any] | None
+    explainability_status: str | None = None
+    explainability_error: str | None = None
+    explainability_summary: dict[str, Any] | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

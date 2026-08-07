@@ -38,6 +38,11 @@ class AIQueryCache(Base):
     reasoning: Mapped[str] = mapped_column(Text, nullable=False)
     supporting_data: Mapped[str] = mapped_column(Text, nullable=False)
     recommendation: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    # ── RAGAS Evaluation Metrics ──────────────────────────────────────────────
+    context_relevance_score: Mapped[float | None] = mapped_column(nullable=True)
+    faithfulness_score: Mapped[float | None] = mapped_column(nullable=True)
+    answer_relevance_score: Mapped[float | None] = mapped_column(nullable=True)
+    evaluation_reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # ── Timestamps ────────────────────────────────────────────────────────────
     created_at: Mapped[datetime] = mapped_column(

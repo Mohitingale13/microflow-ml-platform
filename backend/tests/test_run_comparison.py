@@ -161,8 +161,8 @@ class TestComparisonPromptBuilder:
             run_a=run_a, run_b=run_b, experiment=exp,
             dataset=ds, result_a=res_a, result_b=res_b,
         )
-        assert "Run number: 3" in prompt
-        assert "Run number: 7" in prompt
+        assert "Run #3" in prompt
+        assert "Run #7" in prompt
 
     def test_prompt_contains_dataset_info(self):
         exp = _make_experiment()
@@ -552,6 +552,7 @@ class TestRunComparisonService:
 
         acc_delta = next(d for d in result.metric_deltas if d.metric == "Accuracy")
         assert acc_delta.direction == "up"
+        assert acc_delta.delta is not None
         assert abs(acc_delta.delta - 0.05) < 1e-6
 
 

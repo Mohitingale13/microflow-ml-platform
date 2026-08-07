@@ -32,14 +32,15 @@ class PipelineService:
 
     # Stage node definitions (order matters)
     STAGES = [
-        {"id": "dataset",    "label": "Dataset",    "icon": "Database",    "stage_type": "dataset"},
-        {"id": "experiment", "label": "Experiment", "icon": "FlaskConical","stage_type": "experiment"},
-        {"id": "run",        "label": "Run",        "icon": "Play",        "stage_type": "run"},
-        {"id": "training",   "label": "Training",   "icon": "BrainCircuit","stage_type": "training"},
-        {"id": "evaluation", "label": "Evaluation", "icon": "BarChart2",   "stage_type": "evaluation"},
-        {"id": "artifacts",  "label": "Artifacts",  "icon": "Package",     "stage_type": "artifacts"},
-        {"id": "metrics",    "label": "Metrics",    "icon": "TrendingUp",  "stage_type": "metrics"},
-        {"id": "completed",  "label": "Completed",  "icon": "CheckCircle2","stage_type": "completed"},
+        {"id": "dataset",        "label": "Dataset",        "icon": "Database",    "stage_type": "dataset"},
+        {"id": "experiment",     "label": "Experiment",     "icon": "FlaskConical","stage_type": "experiment"},
+        {"id": "run",            "label": "Run",            "icon": "Play",        "stage_type": "run"},
+        {"id": "training",       "label": "Training",       "icon": "BrainCircuit","stage_type": "training"},
+        {"id": "evaluation",     "label": "Evaluation",     "icon": "BarChart2",   "stage_type": "evaluation"},
+        {"id": "explainability", "label": "Explainability", "icon": "Eye",         "stage_type": "explainability"},
+        {"id": "artifacts",      "label": "Artifacts",      "icon": "Package",     "stage_type": "artifacts"},
+        {"id": "metrics",        "label": "Metrics",        "icon": "TrendingUp",  "stage_type": "metrics"},
+        {"id": "completed",      "label": "Completed",      "icon": "CheckCircle2","stage_type": "completed"},
     ]
 
     def __init__(self) -> None:
@@ -111,6 +112,12 @@ class PipelineService:
             if run_status == "completed":
                 if stage == "metrics" or stage == "completed":
                     return "completed" if has_result else "skipped"
+                if stage == "explainability":
+                    if result and result.explainability_status == "completed":
+                        return "completed"
+                    elif result and result.explainability_status == "failed":
+                        return "failed"
+                    return "skipped"
                 if stage == "artifacts":
                     return "completed" if has_artifacts else "skipped"
                 return "completed"
@@ -178,6 +185,13 @@ class PipelineService:
                     "precision": round(result.precision, 4) if result.precision else None,
                     "recall": round(result.recall, 4) if result.recall else None,
                 }
+
+            elif stage_id == "explainability" and result:
+                detail = {
+                    "status": result.explainability_status or "skipped",
+                }
+                if result.explainability_error:
+                    detail["error"] = result.explainability_error
 
             elif stage_id == "artifacts":
                 detail = {

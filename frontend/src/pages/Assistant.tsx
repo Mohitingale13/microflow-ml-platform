@@ -23,6 +23,10 @@ import {
   MessageSquare,
   AlertCircle,
   Trash2,
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
+  FileText,
 } from 'lucide-react';
 import { askAssistant, getRecentQueries, getSuggestedQuestions } from '@/services/ai.service';
 import type { AIQueryResponse, ConversationMessage } from '@/types/ai.types';
@@ -44,6 +48,7 @@ export function Assistant() {
   // Active answer and lightweight session context
   const [activeResponse, setActiveResponse] = useState<AIQueryResponse | null>(null);
   const [sessionContext, setSessionContext] = useState<ConversationMessage[]>([]);
+  const [expandedSourceId, setExpandedSourceId] = useState<string | null>(null);
 
   // Auxiliary data
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
@@ -145,7 +150,7 @@ export function Assistant() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-purple-600/10 to-blue-600/10 dark:from-purple-500/20 dark:to-blue-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/25 shadow-sm flex items-center gap-1.5">
+          <div className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[var(--color-accent-purple)]/10 text-[var(--color-accent-purple)] border border-[var(--color-accent-purple)]/25 shadow-sm flex items-center gap-1.5">
             <Cpu size={14} />
             <span>Source of Truth</span>
           </div>
@@ -153,7 +158,7 @@ export function Assistant() {
             <button
               onClick={handleClearSession}
               title="Clear active conversation session"
-              className="btn btn-secondary px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1.5 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="btn btn-secondary px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-[var(--color-text-muted)] flex items-center gap-1.5 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-[var(--color-surface-2)] transition-colors"
             >
               <Trash2 size={13} />
               <span>Reset Session</span>
@@ -165,7 +170,7 @@ export function Assistant() {
       {/* ── Main Search Input Box ───────────────────────────────────────────── */}
       <div className="relative group">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
-        <div className="relative bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-gray-800 rounded-2xl shadow-xl p-3 sm:p-4 flex flex-col gap-3">
+        <div className="relative bg-white dark:bg-[var(--color-surface)] ring-1 ring-gray-200 dark:ring-gray-800 rounded-2xl shadow-xl p-3 sm:p-4 flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
             <div className="flex items-center gap-2 flex-1 pl-1 sm:pl-2">
               <span className="text-purple-600 dark:text-purple-400 shrink-0">
@@ -177,17 +182,17 @@ export function Assistant() {
                 onChange={(e) => setQuestion(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Query metrics, runs, models, or datasets..."
-                className="w-full bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none text-sm sm:text-base font-medium px-2 py-1.5"
+                className="w-full bg-transparent text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none text-sm sm:text-base font-medium px-2 py-1.5"
                 disabled={loading}
               />
             </div>
             <button
               onClick={() => handleAsk()}
               disabled={loading || !question.trim()}
-              className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-semibold text-white shadow-md flex items-center justify-center gap-2 transition-all duration-200 shrink-0 ${
+              className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-semibold shadow-md flex items-center justify-center gap-2 transition-all duration-200 shrink-0 ${
                 loading || !question.trim()
-                  ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed opacity-75'
-                  : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 hover:shadow-lg active:scale-[0.98]'
+                  ? 'bg-gray-400 dark:bg-gray-700 text-white cursor-not-allowed opacity-75'
+                  : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white hover:shadow-lg active:scale-[0.98]'
               }`}
             >
               {loading ? (
@@ -213,9 +218,9 @@ export function Assistant() {
             {suggestions.map((sug, i) => (
               <button
                 key={i}
-                onClick={() => handleAsk(sug)}
+                onClick={() => setQuestion(sug)}
                 disabled={loading}
-                className="text-xs font-medium px-3 py-1.5 rounded-full bg-gray-100/80 dark:bg-gray-800/80 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-300 hover:text-purple-700 dark:hover:text-purple-300 border border-gray-200/80 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-800 transition-all shadow-sm"
+                className="text-xs font-medium px-3 py-1.5 rounded-full bg-[var(--color-surface-2)] hover:bg-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] transition-all shadow-sm"
               >
                 {sug}
               </button>
@@ -239,9 +244,9 @@ export function Assistant() {
       {activeResponse ? (
         <div className="space-y-6 animate-fadeIn">
           {/* Query Header bar */}
-          <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+          <div className="p-4 rounded-xl bg-gray-50 dark:bg-[var(--color-surface-2)]/50 border border-gray-200 dark:border-gray-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 text-purple-600 dark:text-purple-400 font-bold">
+              <div className="p-2 rounded-lg bg-white dark:bg-[var(--color-surface-2)] shadow-sm border border-gray-200 dark:border-gray-700 text-purple-600 dark:text-purple-400 font-bold">
                 Q
               </div>
               <div>
@@ -261,7 +266,7 @@ export function Assistant() {
           {/* 4-Column Structured Engineering Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* 1. Primary Answer */}
-            <div className="md:col-span-2 bg-white dark:bg-gray-900 border border-purple-200 dark:border-purple-900/60 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
+            <div className="md:col-span-2 bg-white dark:bg-[var(--color-surface)] border border-purple-200 dark:border-purple-900/60 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow">
               <div className="flex items-center gap-2.5 pb-3.5 mb-3.5 border-b border-gray-100 dark:border-gray-800">
                 <span className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 font-bold">
                   <CheckCircle2 size={20} />
@@ -270,37 +275,37 @@ export function Assistant() {
                   Analysis & Findings
                 </h3>
               </div>
-              <p className="text-gray-800 dark:text-gray-200 text-base leading-relaxed whitespace-pre-wrap font-normal">
+              <p className="text-gray-800 dark:text-[var(--color-text-secondary)] text-base leading-relaxed whitespace-pre-wrap font-normal">
                 {activeResponse.answer}
               </p>
             </div>
 
             {/* 2. Analytical Reasoning */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-[var(--color-surface)] border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2.5 pb-3 mb-3 border-b border-gray-100 dark:border-gray-800">
                 <span className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
                   <Cpu size={18} />
                 </span>
-                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-700 dark:text-[var(--color-text-muted)]">
                   Reasoning
                 </h3>
               </div>
-              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+              <p className="text-gray-700 dark:text-[var(--color-text-muted)] text-sm leading-relaxed whitespace-pre-wrap">
                 {activeResponse.reasoning}
               </p>
             </div>
 
             {/* 3. Supporting Data (Source of Truth) */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-[var(--color-surface)] border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2.5 pb-3 mb-3 border-b border-gray-100 dark:border-gray-800">
                 <span className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
                   <Database size={18} />
                 </span>
-                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-700 dark:text-[var(--color-text-muted)]">
                   Telemetry Evidence
                 </h3>
               </div>
-              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed font-mono text-xs whitespace-pre-wrap bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+              <p className="text-gray-700 dark:text-[var(--color-text-muted)] text-sm leading-relaxed font-mono text-xs whitespace-pre-wrap bg-gray-50 dark:bg-[var(--color-surface-2)]/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
                 {activeResponse.supporting_data}
               </p>
             </div>
@@ -315,22 +320,72 @@ export function Assistant() {
                   Suggested Next Step
                 </h3>
               </div>
-              <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed whitespace-pre-wrap font-medium">
+              <p className="text-gray-800 dark:text-[var(--color-text-secondary)] text-sm leading-relaxed whitespace-pre-wrap font-medium">
                 {activeResponse.recommendation || "No further action required."}
               </p>
             </div>
+
+            {/* 5. Hybrid RAG Semantic Knowledge Base Sources */}
+            {activeResponse.sources && activeResponse.sources.length > 0 && (
+              <div className="md:col-span-2 bg-gradient-to-r from-purple-50/50 to-indigo-50/50 dark:from-purple-950/20 dark:to-indigo-950/20 border border-purple-200 dark:border-purple-900/60 rounded-2xl p-5 shadow-sm">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-purple-200/60 dark:border-purple-900/40">
+                  <div className="flex items-center gap-2.5">
+                    <span className="p-2 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 font-bold">
+                      <BookOpen size={18} />
+                    </span>
+                    <div>
+                      <h3 className="font-bold text-sm uppercase tracking-wider text-purple-900 dark:text-purple-300 flex items-center gap-2">
+                        <span>Sources Used</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-purple-600/10 text-purple-700 dark:text-purple-300 font-mono font-semibold">
+                          Hybrid RAG (pgvector Top-{activeResponse.sources.length})
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  {activeResponse.sources.map((src, idx) => (
+                    <div key={idx} className="p-3 bg-white dark:bg-[var(--color-surface)] border border-purple-100 dark:border-purple-900/40 rounded-xl text-xs shadow-sm">
+                      <div 
+                        onClick={() => setExpandedSourceId(expandedSourceId === src.document_id ? null : src.document_id)}
+                        className="flex items-center justify-between cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                      >
+                        <div className="flex items-center gap-2 font-semibold">
+                          <FileText size={14} className="text-purple-500 shrink-0" />
+                          <span>{src.title}</span>
+                          {src.score !== undefined && src.score !== null && (
+                            <span className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-[var(--color-surface-2)] text-[10px] font-mono text-gray-500">
+                              match: {(src.score * 100).toFixed(0)}%
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-gray-400">
+                          {expandedSourceId === src.document_id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                        </div>
+                      </div>
+                      {expandedSourceId === src.document_id && (
+                        <div className="mt-2.5 pt-2.5 border-t border-gray-100 dark:border-gray-800 text-gray-600 dark:text-gray-400 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
+                          {src.snippet}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : (
         /* Empty Welcome Hero when no query asked yet */
-        <div className="py-12 px-6 rounded-3xl bg-gradient-to-br from-gray-50 via-purple-50/20 to-blue-50/20 dark:from-gray-900/80 dark:via-purple-950/20 dark:to-gray-900 border border-gray-200/70 dark:border-gray-800 text-center shadow-inner max-w-4xl mx-auto">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-purple-600 to-blue-600 text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-purple-500/20">
+        <div className="py-12 px-6 rounded-3xl bg-[var(--color-surface)] border border-[var(--color-border)] text-center shadow-sm max-w-4xl mx-auto">
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-purple-600 to-blue-600 text-white flex items-center justify-center mx-auto mb-5 shadow-md shadow-purple-500/20">
             <Sparkles size={32} />
           </div>
-          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
+          <h2 className="text-2xl font-extrabold text-[var(--color-text-primary)] tracking-tight">
             Query your experiment telemetry.
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xl mx-auto mt-2.5 leading-relaxed font-medium">
+          <p className="text-sm text-[var(--color-text-secondary)] max-w-xl mx-auto mt-2.5 leading-relaxed font-medium">
             Analyze evaluation metrics, compare model performance deltas, or troubleshoot training failures across your workspace.
           </p>
         </div>
@@ -339,23 +394,23 @@ export function Assistant() {
       {/* ── Recent Questions Section ────────────────────────────────────────── */}
       <div className="pt-8 border-t border-gray-200/60 dark:border-gray-800">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+          <h3 className="text-base font-bold text-gray-800 dark:text-[var(--color-text-secondary)] flex items-center gap-2">
             <Clock size={18} className="text-gray-500" />
             <span>Recent Platform Questions</span>
           </h3>
           <button
             onClick={() => loadAuxiliaryData(true)}
             disabled={recentLoading}
-            className="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+            className="text-xs font-bold px-3.5 py-1.5 rounded-lg bg-[var(--color-accent-purple)]/10 hover:bg-[var(--color-accent-purple)]/20 border border-[var(--color-accent-purple)]/30 text-[var(--color-accent-purple)] flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
           >
             {refreshFeedback ? (
               <>
-                <CheckCircle2 size={13} className="text-emerald-400" />
-                <span className="text-emerald-300 font-bold">Updated!</span>
+                <CheckCircle2 size={13} className="text-emerald-500" />
+                <span className="text-emerald-600 font-bold">Updated!</span>
               </>
             ) : (
               <>
-                <RefreshCw size={13} className={recentLoading ? "animate-spin text-purple-200" : ""} />
+                <RefreshCw size={13} className={recentLoading ? "animate-spin text-[var(--color-accent-purple)]" : ""} />
                 <span>{recentLoading ? "Refreshing..." : "Refresh list"}</span>
               </>
             )}
@@ -365,11 +420,11 @@ export function Assistant() {
         {recentLoading && recentQueries.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="h-20 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
+              <div key={n} className="h-20 bg-gray-100 dark:bg-[var(--color-surface-2)] rounded-xl animate-pulse" />
             ))}
           </div>
         ) : recentQueries.length === 0 ? (
-          <div className="text-center py-8 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/40 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+          <div className="text-center py-8 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-[var(--color-surface-2)]/40 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
             No recent questions recorded yet. Ask a question above to begin!
           </div>
         ) : (
@@ -378,10 +433,10 @@ export function Assistant() {
               <div
                 key={item.id}
                 onClick={() => handleSelectRecent(item)}
-                className="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
+                className="p-4 rounded-xl bg-white dark:bg-[var(--color-surface)] border border-gray-200/80 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-1">
+                  <h4 className="text-sm font-bold text-gray-800 dark:text-[var(--color-text-secondary)] group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-1">
                     "{item.question}"
                   </h4>
                 </div>

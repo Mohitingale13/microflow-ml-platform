@@ -12,11 +12,11 @@ export function DatasetDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'schema' | 'preview' | 'statistics' | 'storage' | 'ai_insights'>('overview');
-  
+
   const { data: dataset, isLoading, error } = useDataset(id!);
   const { data: preview, isLoading: isLoadingPreview, error: previewError } = useDatasetPreview(id!);
   const { data: stats, isLoading: isLoadingStats, error: statsError } = useDatasetStatistics(id!);
-  
+
   const deleteMutation = useDeleteDataset();
 
   const handleDelete = async () => {
@@ -65,14 +65,14 @@ export function DatasetDetail() {
     { id: 'preview', label: 'Preview', icon: <Table2 className="w-4 h-4" /> },
     { id: 'statistics', label: 'Statistics', icon: <FileBarChart className="w-4 h-4" /> },
     { id: 'storage', label: 'Storage', icon: <HardDrive className="w-4 h-4" /> },
-    { id: 'ai_insights', label: '✨ AI Insights', icon: <Sparkles className="w-4 h-4 text-purple-400" /> },
+    { id: 'ai_insights', label: 'AI Insights', icon: <Sparkles className="w-4 h-4 text-purple-400" /> },
   ] as const;
 
   return (
     <div className="page h-[calc(100vh-[var(--header-height)])] flex flex-col">
       {/* Header */}
       <div className="flex-none pb-6">
-        <button 
+        <button
           onClick={() => navigate('/datasets')}
           className="text-text-muted hover:text-text-primary flex items-center gap-1.5 text-sm font-medium mb-4 transition-colors"
         >
@@ -92,9 +92,9 @@ export function DatasetDetail() {
               {dataset.description || 'No description provided.'}
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
               className="btn bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 flex items-center gap-2"
@@ -108,7 +108,7 @@ export function DatasetDetail() {
 
       {/* Tactile, Mobile-First Interactive Tab Buttons */}
       <div className="mb-8 flex-none">
-        <div className="flex flex-wrap sm:inline-flex items-center gap-2 p-2 bg-black/40 border border-white/15 rounded-2xl shadow-inner w-full sm:w-auto">
+        <div className="flex flex-wrap sm:inline-flex items-center gap-2 p-2 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl w-full sm:w-auto">
           {tabs.map(tab => {
             const isActive = activeTab === tab.id;
             const isAI = tab.id === 'ai_insights';
@@ -116,15 +116,14 @@ export function DatasetDetail() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2.5 py-2.5 px-5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 shadow-sm whitespace-nowrap select-none cursor-pointer ${
-                  isActive
-                    ? isAI
-                      ? 'bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30 border border-purple-300/40 ring-1 ring-white/20'
-                      : 'bg-white/20 text-white border border-white/30 shadow-md shadow-black/50'
-                    : 'bg-white/[0.04] text-gray-300 hover:text-white hover:bg-white/15 border border-white/10'
-                }`}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2.5 py-2.5 px-5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 whitespace-nowrap select-none cursor-pointer ${isActive
+                  ? isAI
+                    ? 'bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white shadow-md border border-purple-300/40'
+                    : 'bg-[var(--color-surface)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-sm'
+                  : 'bg-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] border border-transparent'
+                  }`}
               >
-                <span className={isActive && isAI ? 'text-purple-200 animate-pulse' : 'text-gray-200'}>
+                <span className={isActive && isAI ? 'text-purple-200 animate-pulse' : 'text-inherit opacity-80'}>
                   {tab.icon}
                 </span>
                 <span className="tracking-wide">{tab.label}</span>
@@ -140,13 +139,13 @@ export function DatasetDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Total Rows" value={dataset.row_count?.toLocaleString() ?? '-'} />
             <StatCard label="Total Columns" value={dataset.column_count?.toLocaleString() ?? '-'} />
-            <StatCard 
-              label="File Size" 
-              value={formatBytes(dataset.file_size_bytes)} 
+            <StatCard
+              label="File Size"
+              value={formatBytes(dataset.file_size_bytes)}
             />
-            <StatCard 
-              label="Uploaded On" 
-              value={new Date(dataset.created_at).toLocaleDateString()} 
+            <StatCard
+              label="Uploaded On"
+              value={new Date(dataset.created_at).toLocaleDateString()}
             />
           </div>
         )}
@@ -157,13 +156,13 @@ export function DatasetDetail() {
               <thead>
                 <tr className="bg-surface-2 border-b border-border">
                   <th className="px-4 py-3 text-xs font-medium tracking-wider text-text-muted uppercase">Column Name</th>
-                  <th className="px-4 py-3 text-xs font-medium tracking-wider text-text-muted uppercase">Data Type (Pandas)</th>
+                  <th className="px-4 py-3 text-xs font-medium tracking-wider text-text-muted uppercase">Data Type</th>
                   <th className="px-4 py-3 text-xs font-medium tracking-wider text-text-muted uppercase">Missing Values</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border)]">
                 {dataset.column_names?.map(col => (
-                  <tr key={col} className="hover:bg-white/5 transition-colors">
+                  <tr key={col} className="hover:bg-[var(--color-surface-2)] transition-colors">
                     <td className="px-4 py-3 font-medium text-text-primary text-sm">{col}</td>
                     <td className="px-4 py-3">
                       <span className="text-xs font-mono text-text-muted bg-surface-2 px-2 py-1 rounded">

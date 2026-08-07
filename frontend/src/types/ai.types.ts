@@ -61,6 +61,14 @@ export interface AIQueryRequest {
   context?: ConversationMessage[];
 }
 
+export interface RetrievedSource {
+  document_type: string;
+  document_id: string;
+  title: string;
+  snippet: string;
+  score?: number | null;
+}
+
 export interface AIQueryResponse {
   id: string;
   question: string;
@@ -72,5 +80,6 @@ export interface AIQueryResponse {
   model_name: string;
   generated_at: string; // ISO datetime string
   cached: boolean;
+  sources?: RetrievedSource[];
 }
 

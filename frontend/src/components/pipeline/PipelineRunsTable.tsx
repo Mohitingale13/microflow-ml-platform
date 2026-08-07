@@ -133,11 +133,8 @@ export function PipelineRunsTable({ runs, onSelectRun, selectedRunId }: Props) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search runs…"
-            style={{
-              width: '100%', paddingLeft: 30, paddingRight: 12, height: 36,
-              background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-              borderRadius: '0.5rem', color: 'var(--text-primary)', fontSize: '0.82rem',
-            }}
+            className="input"
+            style={{ width: '100%', paddingLeft: 30, height: 36, fontSize: '0.82rem' }}
           />
         </div>
 
@@ -148,10 +145,8 @@ export function PipelineRunsTable({ runs, onSelectRun, selectedRunId }: Props) {
         <select
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value)}
-          style={{
-            height: 36, background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-            borderRadius: '0.5rem', color: 'var(--text-primary)', fontSize: '0.82rem', padding: '0 0.75rem',
-          }}
+          className="input"
+          style={{ height: 36, fontSize: '0.82rem' }}
         >
           <option value="">All Statuses</option>
           {ALL_STATUSES.map(s => (
@@ -162,10 +157,8 @@ export function PipelineRunsTable({ runs, onSelectRun, selectedRunId }: Props) {
         <select
           value={filterModel}
           onChange={e => setFilterModel(e.target.value)}
-          style={{
-            height: 36, background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-            borderRadius: '0.5rem', color: 'var(--text-primary)', fontSize: '0.82rem', padding: '0 0.75rem',
-          }}
+          className="input"
+          style={{ height: 36, fontSize: '0.82rem' }}
         >
           <option value="">All Models</option>
           {models.map(m => (

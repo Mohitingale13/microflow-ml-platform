@@ -27,6 +27,9 @@ class RunResultRepository:
         dataset_id: str | None = None,
         training_config_snapshot: dict[str, Any] | None = None,
         preprocessing_summary: dict[str, Any] | None = None,
+        explainability_status: str | None = None,
+        explainability_error: str | None = None,
+        explainability_summary: dict[str, Any] | None = None,
     ) -> RunResult:
         result = RunResult(
             run_id=run_id,
@@ -43,6 +46,9 @@ class RunResultRepository:
             dataset_id=dataset_id,
             training_config_snapshot=training_config_snapshot,
             preprocessing_summary=preprocessing_summary,
+            explainability_status=explainability_status,
+            explainability_error=explainability_error,
+            explainability_summary=explainability_summary,
         )
         db.add(result)
         db.commit()

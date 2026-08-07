@@ -180,7 +180,7 @@ export function Artifacts() {
           <button
             onClick={handleRefresh}
             disabled={isRefetchingArtifacts || isManualRefreshing}
-            className="px-3.5 py-2 text-xs font-bold text-gray-200 hover:text-white border border-white/15 rounded-xl bg-white/5 hover:bg-white/10 flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+            className="px-3.5 py-2 text-xs font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] rounded-xl bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-2)] flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
             title="Refresh artifacts"
           >
             {refreshSuccess ? (
@@ -575,14 +575,14 @@ export function Artifacts() {
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={validPage === 1}
-                      className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-white/5 text-xs font-bold text-gray-200 hover:text-white hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] text-xs font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)] transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer"
                     >
                       Previous
                     </button>
                     <button
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                       disabled={validPage === totalPages}
-                      className="px-3.5 py-1.5 rounded-lg border border-white/15 bg-white/5 text-xs font-bold text-gray-200 hover:text-white hover:bg-white/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] text-xs font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)] transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer"
                     >
                       Next
                     </button>

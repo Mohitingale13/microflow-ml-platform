@@ -33,6 +33,12 @@ class ArtifactType(str, enum.Enum):
     confusion_matrix_json = "confusion_matrix_json"
     configuration_json = "configuration_json"
     preprocessing_json = "preprocessing_json"
+    shap_summary_png = "shap_summary_png"
+    feature_importance_png = "feature_importance_png"
+    shap_dependence_png = "shap_dependence_png"
+    shap_values_json = "shap_values_json"
+    feature_importance_json = "feature_importance_json"
+    explainability_summary_json = "explainability_summary_json"
 
 
 class RunResult(Base):
@@ -75,6 +81,15 @@ class RunResult(Base):
         JSON, nullable=True
     )
     preprocessing_summary: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON, nullable=True
+    )
+    explainability_status: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )
+    explainability_error: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
+    explainability_summary: Mapped[dict[str, Any] | None] = mapped_column(
         JSON, nullable=True
     )
 

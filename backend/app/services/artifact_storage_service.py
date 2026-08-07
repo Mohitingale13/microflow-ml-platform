@@ -95,6 +95,34 @@ class ArtifactStorageService:
         logger.info("JSON artifact saved: path=%s size=%d", path, size)
         return filename, str(path), size, checksum
 
+    def save_png(
+        self,
+        run_id: str,
+        filename: str,
+        fig: Any,
+    ) -> tuple[str, str, int, str]:
+        """
+        Save a Matplotlib figure as a PNG file.
+
+        Returns
+        -------
+        (filename, storage_path_str, file_size_bytes, sha256_checksum)
+        """
+        artifact_dir = self.get_artifact_dir(run_id)
+        path = artifact_dir / filename
+
+        try:
+            fig.savefig(path, format="png", bbox_inches="tight", dpi=300)
+        except Exception as exc:
+            raise ArtifactStorageError(
+                f"Failed to write PNG artifact '{filename}': {exc}"
+            ) from exc
+
+        size = path.stat().st_size
+        checksum = self._compute_sha256(path)
+        logger.info("PNG artifact saved: path=%s size=%d", path, size)
+        return filename, str(path), size, checksum
+
     def cleanup_run_directory(self, run_id: str) -> None:
         """Remove the entire artifact directory for a run (rollback on failure)."""
         artifact_dir = Path(settings.STORAGE_BASE_PATH) / "artifacts" / run_id

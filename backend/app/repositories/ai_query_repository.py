@@ -31,6 +31,16 @@ class AIQueryRepository:
             .all()
         )
 
+    def get_unevaluated(self, limit: int, db: Session) -> list[AIQueryCache]:
+        """Return cached queries that have not yet been evaluated by RAGAS."""
+        return (
+            db.query(AIQueryCache)
+            .filter(AIQueryCache.context_relevance_score.is_(None))
+            .order_by(AIQueryCache.created_at.asc())
+            .limit(limit)
+            .all()
+        )
+
     def create(
         self,
         db: Session,

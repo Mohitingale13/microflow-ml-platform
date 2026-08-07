@@ -28,16 +28,16 @@
 **A full-stack ML experimentation and observability platform with an integrated AI engineering co-pilot.**
 
 ### Platform Features
-- ✔ Dataset Management with AI Insights
-- ✔ Experiment Tracking with AI Strategy Co-Pilot
-- ✔ Run Tracking with AI Peer Review & Comparison
-- ✔ Ask MicroFlow — Natural Language Query Assistant
-- ✔ Training Engine (Random Forest, XGBoost, Logistic Regression)
-- ✔ Paginated Artifact Registry (50 items/page, sorted by latest)
-- ✔ Metrics Dashboard
-- ✔ Pipeline Visualization & Lineage Graph
-- ✔ Interactive Engineering Dashboard
-- ✔ Platform Health Monitor
+- Dataset Management with AI Insights
+- Experiment Tracking with AI Strategy Co-Pilot
+- Run Tracking with AI Peer Review & Comparison
+- Ask MicroFlow — Hybrid RAG Assistant with RAGAS Evaluation Layer
+- Training Engine (Random Forest, XGBoost, Logistic Regression) with SHAP Explainability
+- Paginated Artifact Registry (50 items/page, sorted by latest)
+- Metrics Dashboard
+- Pipeline Visualization & Lineage Graph
+- Interactive Engineering Dashboard
+- Platform Health Monitor
 
 ---
 
@@ -45,22 +45,24 @@
 
 Running one model once is easy. Running hundreds of experiments over several datasets, comparing results across model configurations, and reproducing a specific run six months later — that is the actual problem.
 
-MicroFlow is a full-stack ML platform designed to solve exactly that. It handles the infrastructure layer of machine learning: dataset versioning, experiment definition, run tracking, artifact persistence, and metrics aggregation — all backed by an AI engineering co-pilot powered by Google Gemini that operates strictly on authentic experiment telemetry without hallucination.
+MicroFlow is a full-stack ML platform designed to solve exactly that. It handles the infrastructure layer of machine learning: dataset versioning, experiment definition, run tracking, artifact persistence, model explainability (SHAP), and metrics aggregation — all backed by an AI engineering co-pilot powered by Google Gemini that operates strictly on authentic experiment telemetry without hallucination.
 
 The platform is aimed at ML engineers, data scientists, and research engineers who need an organised, auditable, and AI-assisted workflow.
 
 ---
 
 ## Highlights
-- ✔ Full-stack ML platform — FastAPI + React + PostgreSQL
-- ✔ 264+ automated backend tests, all passing
-- ✔ Dockerized, three-container deployment (Nginx + FastAPI + PostgreSQL)
-- ✔ Complete AI Engineering Suite powered by Google Gemini 3.6 Flash
-- ✔ Automatic exponential backoff & multi-model fallback for AI resilience
-- ✔ SHA-256 deterministic caching for all AI responses
-- ✔ Paginated Artifact Registry with latest-first ordering
-- ✔ Uniform refresh UX with 500 ms minimum spinner + confirmation badge
-- ✔ Interactive Metrics Dashboard & Pipeline Visualization
+- Full-stack ML platform — FastAPI + React + PostgreSQL
+- 264+ automated backend tests, all passing
+- Dockerized, three-container deployment (Nginx + FastAPI + PostgreSQL/pgvector)
+- Complete AI Engineering Suite powered by Google Gemini 3.6 Flash
+- Automatic exponential backoff & multi-model fallback for AI resilience
+- SHA-256 deterministic caching for all AI responses
+- LLM-as-a-Judge Evaluation Layer (RAGAS) mathematically measuring AI hallucination
+- Global Feature Importance via SHAP integration for all models
+- Paginated Artifact Registry with latest-first ordering
+- Uniform refresh UX with 500 ms minimum spinner + confirmation badge
+- Interactive Metrics Dashboard & Pipeline Visualization
 
 ---
 
@@ -69,25 +71,14 @@ The platform is aimed at ML engineers, data scientists, and research engineers w
 ### Dashboard
 ![Dashboard](images/dashboard.png)
 
-### Ask MicroFlow — Natural Language Assistant
+### Ask MicroFlow — Hybrid RAG Assistant
 ![Assistant](images/assistant.png)
-
-### Training Runs
-![Training Page](images/training.png)
-
-### Artifact Registry (Paginated)
-![Artifact Registry](images/artifacts.png)
-
-### AI Strategy Co-Pilot (per Experiment)
-![AI Strategy](images/ai_strategy.png)
-
-### Pipeline Visualization
-![Pipeline Flow Graph](images/pipeline_flow_graph.png)
-![Pipeline Timeline](images/pipeline_timeline.png)
-![Pipeline Lineage](images/pipeline.png)
 
 ### Metrics Dashboard
 ![Metrics Dashboard](images/metrics.png)
+
+### Pipeline Visualization
+![Pipeline Flow Graph](images/pipeline.png)
 
 ---
 
@@ -117,7 +108,7 @@ graph TD
     Nginx[Nginx]
     FastAPI[FastAPI]
     Gemini[Google Gemini API]
-    PostgreSQL[(PostgreSQL)]
+    PostgreSQL[(PostgreSQL + pgvector)]
     Storage[(Local Storage)]
 
     Browser -->|HTTP| Nginx
@@ -163,19 +154,43 @@ All five AI capabilities share a common architecture: **zero hallucination by de
 - **Multi-model quota pooling & instant failover**: `gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-3-flash` → `gemini-2.5-flash` → `gemini-2.5-flash-lite` (with zero-delay failover and smart cooldown tracking on rate limits)
 - Errors are surfaced to the frontend with full API status context
 
-#### 1. Ask MicroFlow (Natural Language Assistant)
-Query your experiment telemetry in plain English from a dedicated assistant page:
-- *"Which experiment has the best accuracy?"*
-- *"Why did run 4 fail?"*
-- *"Compare all XGBoost models"*
+#### 1. Ask MicroFlow — Hybrid RAG Architecture & Evaluation Layer
+Ask MicroFlow is built as a production-style **Hybrid Retrieval-Augmented Generation (Hybrid RAG)** system powered by **PostgreSQL + pgvector** and **Google text-embedding-004**, backed by an **LLM-as-a-Judge RAGAS Evaluator**:
 
-Every response delivers four structured fields:
+```
+User Question
+      │
+      ▼
+Intent Detection
+      │
+      ├───────────────────────────────┐
+      ▼                               ▼
+Structured Retrieval          Semantic Retrieval
+(SQL Repositories)            (pgvector / text-embedding-004)
+      │                               │
+      └───────────────┬───────────────┘
+                      ▼
+               Context Builder
+                      │
+                      ▼
+                   Gemini
+                      │
+                      ▼
+        Grounded Answer + Sources Used
+```
+
+- **Dual-Retrieval Pipeline**: Combines structured database SQL queries with pgvector semantic similarity search (`<=>` cosine distance) over unstructured engineering narratives.
+- **Sources Attribution**: Displays an interactive **"Sources Used"** drawer in the UI allowing users to inspect matched semantic knowledge snippets.
+- **RAG Evaluation Layer (RAGAS)**: An automated evaluation service that rigorously grades the assistant's responses across three metrics (Context Relevance, Faithfulness, and Answer Relevance) to mathematically prove the absence of hallucination.
+
+Every response delivers five structured fields:
 | Field | Description |
 |---|---|
-| **Analysis & Findings** | The direct, engineering-grade answer |
-| **Reasoning** | How the AI reached its conclusion |
+| **Analysis & Findings** | The direct, engineering-grade answer grounded in structured telemetry & retrieved semantic documents |
+| **Reasoning** | How the AI reached its conclusion based on dual-retrieval context |
 | **Telemetry Evidence** | The raw experiment data backing the answer |
 | **Suggested Next Step** | The single recommended action to take |
+| **Sources Used** | Interactive pgvector semantic document snippets retrieved for RAG context |
 
 Session context carries forward across queries within the same page visit.
 
@@ -205,9 +220,10 @@ Deep analysis comparing any two completed runs within an experiment:
 - Explicit trade-off analysis (accuracy vs. speed vs. generalization)
 - Actionable improvement strategies with specific parameter suggestions
 
-### Training Engine
+### Training Engine & SHAP Explainability
 - Supports three model families: **Random Forest**, **Logistic Regression**, **XGBoost**
 - Preprocessing pipeline: missing value imputation (median/mode), one-hot encoding, stratified train/test split
+- **SHAP Explainability**: Automatically calculates global SHAP feature importance values during evaluation, persisting them for the frontend to visualize exactly which features drove the model's predictions.
 - Model Factory pattern — adding a new estimator requires changes in one file only
 - All training logic is HTTP-free; the engine communicates through plain Python interfaces
 
@@ -252,16 +268,25 @@ Deep analysis comparing any two completed runs within an experiment:
 
 ```mermaid
 graph TD
-    Browser["React Frontend\n(TypeScript, TanStack Query)"]
-    API["FastAPI REST API\n/api/v1"]
-    Routers["Router Layer\n(Request validation, response serialisation)"]
-    Services["Service Layer\n(Business logic)"]
-    Repos["Repository Layer\n(SQLAlchemy ORM)"]
-    DB["PostgreSQL"]
-    Storage["Local File Storage\n/storage"]
-    Training["Training Engine\n(scikit-learn, XGBoost)"]
-    AILayer["AI Layer\n(GeminiService, PromptBuilder, ResponseParser)"]
-    Gemini["Google Gemini API\n(gemini-3.6-flash + fallback chain)"]
+    Browser["React Frontend
+(TypeScript, TanStack Query)"]
+    API["FastAPI REST API
+/api/v1"]
+    Routers["Router Layer
+(Request validation, response serialisation)"]
+    Services["Service Layer
+(Business logic)"]
+    Repos["Repository Layer
+(SQLAlchemy ORM)"]
+    DB["PostgreSQL + pgvector"]
+    Storage["Local File Storage
+/storage"]
+    Training["Training Engine
+(scikit-learn, XGBoost, SHAP)"]
+    AILayer["AI Layer
+(GeminiService, PromptBuilder, ResponseParser)"]
+    Gemini["Google Gemini API
+(gemini-3.6-flash + fallback chain)"]
 
     Browser -->|HTTP/JSON| API
     API --> Routers
@@ -283,18 +308,30 @@ Each layer has exactly one responsibility. Routers never touch the database. Ser
 
 ```mermaid
 graph TD
-    D["Upload Dataset\n(CSV, validated on upload)"]
-    AI_D["AI Insights\n(quality score, feature suggestions)"]
-    E["Create Experiment\n(define objective, link dataset)"]
-    AI_E["AI Strategy\n(evidence-driven next-experiment plan)"]
-    R["Create Run\n(select model, set hyperparameters)"]
-    T["Execute Training\n(POST /runs/{run_id}/execute)"]
-    P["Preprocessing\n(impute, encode, split)"]
-    M["Train & Evaluate\n(accuracy, precision, recall, F1, ROC AUC)"]
-    AI_R["AI Run Review\n(peer review + comparison)"]
-    A["Artifact Generation\n(model, metrics, config snapshots)"]
-    DB["Persist Results\n(RunResult + Artifacts in PostgreSQL)"]
-    Dash["View on Dashboard\n(Metrics, Pipeline, Artifacts, Ask MicroFlow)"]
+    D["Upload Dataset
+(CSV, validated on upload)"]
+    AI_D["AI Insights
+(quality score, feature suggestions)"]
+    E["Create Experiment
+(define objective, link dataset)"]
+    AI_E["AI Strategy
+(evidence-driven next-experiment plan)"]
+    R["Create Run
+(select model, set hyperparameters)"]
+    T["Execute Training
+(POST /runs/{run_id}/execute)"]
+    P["Preprocessing
+(impute, encode, split)"]
+    M["Train & Evaluate
+(metrics, confusion matrix, SHAP)"]
+    AI_R["AI Run Review
+(peer review + comparison)"]
+    A["Artifact Generation
+(model, metrics, config snapshots)"]
+    DB["Persist Results
+(RunResult + Artifacts in PostgreSQL)"]
+    Dash["View on Dashboard
+(Metrics, Pipeline, Artifacts, Ask MicroFlow)"]
 
     D --> AI_D --> E --> AI_E --> R --> T --> P --> M --> AI_R --> A --> DB --> Dash
 ```
@@ -313,9 +350,9 @@ graph TD
 | **Backend** | FastAPI, Python 3.11 |
 | **ORM** | SQLAlchemy 2.0 (mapped columns) |
 | **Validation** | Pydantic v2 |
-| **Database** | PostgreSQL 16 |
+| **Database** | PostgreSQL 16 + pgvector |
 | **AI Engine** | Google Gemini 3.6 Flash (with 5-model Flash quota pooling & cooldown failover) |
-| **ML** | scikit-learn, XGBoost, pandas, NumPy |
+| **ML** | scikit-learn, XGBoost, pandas, NumPy, SHAP |
 | **Infrastructure** | Docker, Docker Compose, Nginx |
 | **Testing** | pytest, SQLite in-memory (StaticPool) |
 
@@ -335,7 +372,7 @@ MicroFlow/
 │   │   ├── repositories/   # Database access layer (incl. AI cache repos)
 │   │   ├── routers/        # FastAPI route handlers
 │   │   ├── schemas/        # Pydantic request/response models
-│   │   ├── services/       # Business logic (incl. AI services)
+│   │   ├── services/       # Business logic (incl. AI services & Evaluation)
 │   │   ├── training/       # ML pipeline (loader, preprocessor, factory, trainer, evaluator)
 │   │   └── main.py
 │   ├── tests/
@@ -371,235 +408,6 @@ MicroFlow/
 ├── storage/                # Artifact file storage (volume-mounted)
 └── docker-compose.yml
 ```
-
----
-
-## Core Modules
-
-### Dataset Management
-Handles CSV ingestion and analysis. On upload, the service reads the file, computes a SHA-256 hash to prevent duplicates, parses column names and data types, and records row count, column count, and per-column missing value percentages. The file is stored on disk and metadata is persisted in PostgreSQL. A preview endpoint returns the first 50 rows. A statistics endpoint returns per-column descriptive statistics. The AI Insights tab delivers a zero-hallucination quality audit grounded entirely in authentic schema metadata.
-
-### Experiment Management
-Experiments sit between datasets and runs. An experiment defines the ML problem: what dataset to use, what the objective is, and what the default training configuration looks like. Multiple runs can be created under one experiment with different model types or hyperparameter overrides. The AI Strategy tab surfaces an evidence-driven co-pilot that synthesizes run history, metric variance, and parameter space coverage into a single, actionable next-experiment recommendation.
-
-### Run Management
-A run is a single training execution. It carries its own model type, hyperparameter overrides (stored as JSON), and status. The status transitions (`draft → queued → running → completed/failed`) are enforced by the service layer. Nothing in the run record is mutable after execution. AI Run Review generates a structured peer review for completed runs; AI Run Comparison performs deep side-by-side attribution analysis for any two runs in the same experiment.
-
-### AI Layer (`backend/app/ai/`)
-Three files, each with a single job:
-- **`gemini_service.py`** — wraps the Google Generative AI SDK with exponential backoff retries for transient spikes and instant zero-delay failover across a 5-model Flash chain (`gemini-3.6`, `3.5`, `3.0`, `2.5`, and `2.5-lite`). Features smart cooldown tracking to maximize daily quota pooling.
-- **`prompt_builder.py`** — constructs fully grounded prompts from pre-fetched repository data. Never constructs SQL. Never invents values. All numeric fields are drawn directly from `RunResult` objects.
-- **`response_parser.py`** — strips markdown fences, extracts embedded JSON, validates required fields, and raises `ValueError` on malformed responses.
-
-The AI services (`AIReviewService`, `AIDatasetInsightsService`, `RunComparisonService`, `AssistantService`) implement a **SHA-256 deterministic cache** — identical inputs always produce a cache hit without redundant Gemini API calls.
-
-### Training Engine
-Five isolated files, each with a single job:
-- **loader.py** — reads a CSV from disk into a pandas DataFrame
-- **preprocessing.py** — imputes missing values, one-hot encodes categoricals, performs a stratified train/test split
-- **model_factory.py** — maps a model type string to a configured scikit-learn or XGBoost estimator
-- **trainer.py** — calls `fit()` and returns the trained estimator
-- **evaluation.py** — computes accuracy, precision, recall, F1, ROC AUC, and confusion matrix
-
-### Artifact Registry
-Every completed run automatically produces six artifact files. The `ArtifactService` writes each file to disk, computes its SHA-256 checksum, records file size and MIME type, and persists the metadata in the `artifacts` table. The registry UI displays 50 artifacts per page sorted latest-first with Previous/Next pagination controls.
-
-### Metrics Dashboard
-A read-only analytics layer that runs SQL aggregations over persisted `RunResult` records. It does not recompute metrics — it reads what was stored during training.
-
-### Pipeline Visualization
-A read-only module that reconstructs the execution graph for any run. It queries the `Run`, `RunResult`, and `Artifact` tables and maps the data onto an eight-stage pipeline representation. The lineage view walks the full Dataset → Experiment → Run → Artifact hierarchy.
-
-### Engineering Dashboard
-An aggregation layer with four dedicated endpoints that pull data from existing repositories without duplicating SQL logic. The Platform Health endpoint reports live service status and the platform version (v1.0.0).
-
----
-
-## API Overview
-
-All endpoints are prefixed with `/api/v1`.
-
-### Datasets
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/datasets` | List all datasets |
-| `POST` | `/datasets` | Upload a CSV dataset |
-| `GET` | `/datasets/{id}` | Dataset metadata |
-| `GET` | `/datasets/{id}/preview` | First 50 rows |
-| `GET` | `/datasets/{id}/statistics` | Per-column statistics |
-| `DELETE` | `/datasets/{id}` | Delete dataset (blocked if experiments exist) |
-| `POST` | `/datasets/{id}/ai-insights` | Generate AI dataset quality audit |
-
-### Experiments & Runs
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/experiments` | List all experiments |
-| `POST` | `/experiments` | Create experiment |
-| `GET` | `/experiments/{id}` | Experiment detail |
-| `GET` | `/runs` | List all runs |
-| `POST` | `/runs` | Create run |
-| `GET` | `/runs/{id}` | Run detail |
-| `POST` | `/runs/{id}/execute` | Execute training for a queued run |
-| `GET` | `/runs/{id}/result` | Persisted evaluation metrics |
-| `GET` | `/runs/{id}/artifacts` | Artifacts generated by a run |
-| `POST` | `/runs/{id}/ai-review` | Generate AI peer review |
-| `GET` | `/runs/compare` | AI deep comparison of two runs |
-
-### Artifacts
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/artifacts` | List all artifacts |
-| `GET` | `/artifacts/stats` | Registry statistics |
-| `GET` | `/artifacts/{id}` | Artifact metadata |
-| `GET` | `/artifacts/{id}/download` | Download artifact file |
-
-### AI Assistant
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/assistant/query` | Natural language query against experiment telemetry |
-| `GET` | `/assistant/recent` | Recent platform-wide questions and answers |
-
-### Metrics
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/metrics/overview` | System-wide aggregated metrics |
-| `GET` | `/metrics/models` | Model leaderboard |
-| `GET` | `/metrics/experiments` | Experiment performance analytics |
-| `GET` | `/metrics/datasets` | Dataset performance analytics |
-| `GET` | `/metrics/runs/compare` | Side-by-side run comparison |
-
-### Pipeline
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/pipeline/overview` | Global execution statistics |
-| `GET` | `/pipeline/runs` | All runs with filters |
-| `GET` | `/pipeline/lineage` | Full Dataset → Artifacts lineage tree |
-| `GET` | `/pipeline/{run_id}` | Execution graph and timeline for a run |
-
-### Dashboard
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/dashboard/overview` | Platform-wide stat summary |
-| `GET` | `/dashboard/activity` | Unified recent activity feed |
-| `GET` | `/dashboard/recent-runs` | Last N runs with context |
-| `GET` | `/dashboard/quick-stats` | Best model, experiment, dataset, artifact |
-| `GET` | `/health` | Platform health and version (v1.0.0) |
-
----
-
-## Database Design
-
-Five core tables. Every primary key is a UUID string. Every table carries `created_at` and `updated_at` timestamps.
-
-```mermaid
-erDiagram
-    DATASETS {
-        string id PK
-        string name
-        string original_filename
-        string file_hash UK
-        int file_size_bytes
-        int row_count
-        int column_count
-        json column_names
-        json dtypes
-        json missing_values
-        string status
-        string storage_path
-        datetime created_at
-    }
-
-    EXPERIMENTS {
-        string id PK
-        string name
-        string dataset_id FK
-        string objective
-        json default_configuration
-        json tags
-        string status
-        datetime created_at
-        datetime updated_at
-    }
-
-    RUNS {
-        string id PK
-        string experiment_id FK
-        int run_number
-        string model_type
-        json training_configuration
-        string status
-        string notes
-        datetime created_at
-        datetime updated_at
-    }
-
-    RUN_RESULTS {
-        string id PK
-        string run_id FK
-        float accuracy
-        float precision
-        float recall
-        float f1_score
-        float roc_auc
-        json confusion_matrix
-        float execution_time_seconds
-        datetime started_at
-        datetime completed_at
-        string model_type
-        string dataset_id
-        json training_config_snapshot
-        json preprocessing_summary
-    }
-
-    ARTIFACTS {
-        string id PK
-        string run_id FK
-        string experiment_id
-        string dataset_id
-        string artifact_type
-        string filename
-        string mime_type
-        string storage_path
-        int file_size_bytes
-        string sha256_checksum
-        datetime created_at
-    }
-
-    AI_REVIEW_CACHE {
-        string id PK
-        string run_id FK
-        string prompt_hash UK
-        string answer
-        string reasoning
-        string supporting_data
-        string recommendation
-        string confidence
-        datetime generated_at
-    }
-
-    DATASETS ||--o{ EXPERIMENTS : "used by"
-    EXPERIMENTS ||--o{ RUNS : "contains"
-    RUNS ||--o| RUN_RESULTS : "produces"
-    RUNS ||--o{ ARTIFACTS : "generates"
-    RUNS ||--o{ AI_REVIEW_CACHE : "cached by"
-```
-
----
-
-## Training Pipeline
-
-When `POST /api/v1/runs/{run_id}/execute` is called, the `TrainingService` orchestrates the following sequence:
-
-1. **Validate** — confirm the run exists and its status is `queued`. Reject anything else with HTTP 422.
-2. **Transition** — set run status to `running`, persist the timestamp.
-3. **Load** — `loader.py` reads the CSV from disk into a pandas DataFrame. File not found raises immediately, marking the run as `failed`.
-4. **Preprocess** — `preprocessing.py` validates the target column, imputes missing values, one-hot encodes categoricals, and performs a stratified 80/20 train/test split.
-5. **Build estimator** — `model_factory.py` maps the run's `model_type` to a configured estimator. Unknown types fall back to Random Forest.
-6. **Train** — `trainer.py` calls `estimator.fit(X_train, y_train)`.
-7. **Evaluate** — `evaluation.py` computes accuracy, precision, recall, F1, confusion matrix, and ROC AUC.
-8. **Persist result** — a `RunResult` record is written with all numeric metrics, timestamps, and configuration snapshot.
-9. **Generate artifacts** — six files are written to `/storage/{experiment_id}/{run_id}/`. Each is registered with its SHA-256 checksum.
-10. **Transition** — run status moves to `completed`. On any exception in steps 3-9, status moves to `failed`.
 
 ---
 
@@ -692,7 +500,7 @@ Artifacts are written to disk as real files and registered in the database with 
 Metrics are stored in `RunResult` as typed database columns, not as JSON blobs. This allows the metrics repository to run SQL aggregations without deserialising data in application code.
 
 **Why Docker**
-The project runs as three containers: PostgreSQL, the FastAPI backend, and a Nginx-served React frontend. Docker Compose with health checks ensures services start in the correct order.
+The project runs as three containers: PostgreSQL (with pgvector), the FastAPI backend, and a Nginx-served React frontend. Docker Compose with health checks ensures services start in the correct order.
 
 **Why TanStack Query**
 All server state on the frontend is managed by TanStack Query. This provides automatic caching, background refetching, and a clean separation between server state and local UI state.

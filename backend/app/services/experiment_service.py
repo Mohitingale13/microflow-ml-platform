@@ -79,6 +79,12 @@ class ExperimentService:
             experiment.name,
             dataset_id,
         )
+        try:
+            from app.services.embedding_service import EmbeddingService
+            EmbeddingService().index_experiment_description(db, experiment)
+        except Exception as exc:
+            logger.warning("Embedding indexing failed for Experiment %s: %s", experiment.id, exc)
+
         return experiment
 
     def update(
@@ -111,6 +117,13 @@ class ExperimentService:
 
         experiment = self._repo.update(db, experiment, **updates)
         logger.info("Experiment updated: id=%s fields=%s", experiment_id, list(updates.keys()))
+
+        try:
+            from app.services.embedding_service import EmbeddingService
+            EmbeddingService().index_experiment_description(db, experiment)
+        except Exception as exc:
+            logger.warning("Embedding indexing failed for Experiment %s: %s", experiment.id, exc)
+
         return experiment
 
     def archive(self, experiment_id: str, db: Session) -> Experiment:

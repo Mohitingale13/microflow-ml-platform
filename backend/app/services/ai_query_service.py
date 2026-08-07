@@ -24,9 +24,9 @@ from sqlalchemy.orm import Session
 
 from app.ai.cache_service import compute_prompt_hash
 from app.ai.gemini_service import GeminiService
-from app.ai.prompt_builder import build_intent_prompt, build_assistant_prompt
+from app.ai.prompt_builder import build_intent_prompt, build_assistant_prompt, _format_explainability_summary
 from app.ai.response_parser import parse_intent_response, parse_assistant_response
-from app.ai.schemas import AIQueryResponse, ConversationMessage
+from app.ai.schemas import AIQueryResponse, ConversationMessage, RetrievedSource
 from app.models.ai_query import AIQueryCache
 from app.repositories.ai_query_repository import AIQueryRepository
 from app.repositories.dataset_repository import DatasetRepository
@@ -44,6 +44,7 @@ SUPPORTED_INTENTS = {
     "metrics",
     "artifacts",
     "models",
+    "explainability",
     "training_history",
     "ai_reviews",
     "run_comparisons",
@@ -166,7 +167,15 @@ class AIQueryService:
                     exec_t = f"{res.execution_time_seconds:.2f}s" if res.execution_time_seconds else "N/A"
                     metrics_str = f"Accuracy: {acc}, F1 Score: {f1}, Exec Time: {exec_t}"
                 config_str = ", ".join([f"{k}={v}" for k, v in (run.training_configuration or {}).items()]) or "default config"
-                lines.append(f"- Run #{run.run_number} (Experiment: '{exp_name}', Dataset: '{ds_name}') — Model: {run.model_type or 'N/A'} | Status: {run.status.value} | {metrics_str} | Config: [{config_str}]")
+                
+                explain_str = ""
+                if res and res.explainability_status == "completed" and res.explainability_summary:
+                    # Clean up newlines for the single-line output format or just append it
+                    raw_explain = _format_explainability_summary(res.explainability_summary)
+                    clean_explain = raw_explain.replace('\n', ' ').strip()
+                    explain_str = f" | {clean_explain}"
+
+                lines.append(f"- Run #{run.run_number} (Experiment: '{exp_name}', Dataset: '{ds_name}') — Model: {run.model_type or 'N/A'} | Status: {run.status.value} | {metrics_str} | Config: [{config_str}]{explain_str}")
 
         return "\n".join(lines)
 
@@ -225,17 +234,37 @@ class AIQueryService:
             logger.info("Returning cached AI assistant response for query hash: %s", query_hash[:8])
             return self._to_response(cached_record, cached=True)
 
-        # ── 4. Execute Repositories (Source of Truth) ─────────────────────────
+        # ── 4. Execute Hybrid Retrieval (Structured SQL + Semantic pgvector) ───
         structured_data = self._gather_structured_data(extracted.intent, extracted.filters, db)
 
+        semantic_docs = []
+        try:
+            from app.services.embedding_service import EmbeddingService
+            embedding_svc = EmbeddingService(gemini_service=self._gemini)
+            semantic_docs = embedding_svc.retrieve_semantic_context(db, query_text=question, limit=5)
+        except Exception as exc:
+            logger.warning("Semantic document retrieval encountered error: %s", exc)
+
+        sources = [
+            RetrievedSource(
+                document_type=doc["document_type"],
+                document_id=doc["document_id"],
+                title=doc["title"],
+                snippet=doc["snippet"],
+                score=doc["score"],
+            )
+            for doc in semantic_docs
+        ]
+
         # ── 5. Generate Professional Answer via Gemini ────────────────────────
-        logger.info("Generating fresh AI assistant answer (intent=%s)", extracted.intent)
+        logger.info("Generating fresh AI assistant answer (intent=%s, retrieved_docs=%d)", extracted.intent, len(semantic_docs))
         try:
             answer_prompt = build_assistant_prompt(
                 question=question,
                 intent=extracted.intent,
                 structured_data=structured_data,
                 context=context_dicts,
+                semantic_documents=semantic_docs,
             )
             raw_answer = self._gemini.generate_answer(answer_prompt)
         except RuntimeError as exc:
@@ -268,7 +297,9 @@ class AIQueryService:
             recommendation=parsed["recommendation"],
         )
 
-        return self._to_response(record, cached=False)
+        res = self._to_response(record, cached=False)
+        res.sources = sources
+        return res
 
     def get_recent_queries(self, limit: int, db: Session) -> list[AIQueryResponse]:
         records = self._query_repo.get_recent(limit, db)

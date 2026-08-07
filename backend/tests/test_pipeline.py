@@ -268,12 +268,13 @@ class TestPipelineService:
         assert graph["run_id"] == seeded_db["run_id"]
         assert "nodes" in graph
         assert "edges" in graph
-        assert len(graph["nodes"]) == 8   # 8 stages
-        assert len(graph["edges"]) == 7   # 7 connections
+        assert len(graph["nodes"]) == 9   # 9 stages
+        assert len(graph["edges"]) == 8   # 8 connections
 
     def test_pipeline_graph_completed_run_all_nodes_completed(self, db_session, seeded_db):
         service = PipelineService()
         result = service.get_pipeline_graph(seeded_db["run_id"], db_session)
+        assert result is not None
         graph = result["graph"]
         node_statuses = {n["id"]: n["status"] for n in graph["nodes"]}
         assert node_statuses["dataset"] == "completed"
@@ -286,6 +287,7 @@ class TestPipelineService:
     def test_pipeline_graph_nodes_have_required_fields(self, db_session, seeded_db):
         service = PipelineService()
         result = service.get_pipeline_graph(seeded_db["run_id"], db_session)
+        assert result is not None
         for node in result["graph"]["nodes"]:
             assert "id" in node
             assert "label" in node
@@ -296,6 +298,7 @@ class TestPipelineService:
     def test_pipeline_graph_edges_connect_adjacent_stages(self, db_session, seeded_db):
         service = PipelineService()
         result = service.get_pipeline_graph(seeded_db["run_id"], db_session)
+        assert result is not None
         edges = result["graph"]["edges"]
         stage_ids = [s["id"] for s in PipelineService.STAGES]
         for i, edge in enumerate(edges):
@@ -305,6 +308,7 @@ class TestPipelineService:
     def test_timeline_has_events(self, db_session, seeded_db):
         service = PipelineService()
         result = service.get_pipeline_graph(seeded_db["run_id"], db_session)
+        assert result is not None
         timeline = result["timeline"]
         assert "events" in timeline
         assert len(timeline["events"]) > 0
@@ -317,6 +321,7 @@ class TestPipelineService:
     def test_timeline_has_duration_for_completed_run(self, db_session, seeded_db):
         service = PipelineService()
         result = service.get_pipeline_graph(seeded_db["run_id"], db_session)
+        assert result is not None
         assert result["timeline"]["total_duration_seconds"] == 2.54
 
     def test_nonexistent_run_returns_none(self, db_session):
@@ -394,8 +399,8 @@ class TestPipelineRouter:
         assert "data" in body
         assert "timeline" in body
         assert body["data"]["run_id"] == run_id
-        assert len(body["data"]["nodes"]) == 8
-        assert len(body["data"]["edges"]) == 7
+        assert len(body["data"]["nodes"]) == 9
+        assert len(body["data"]["edges"]) == 8
         assert len(body["timeline"]["events"]) > 0
 
     def test_lineage_populated(self, test_client, seeded_db):

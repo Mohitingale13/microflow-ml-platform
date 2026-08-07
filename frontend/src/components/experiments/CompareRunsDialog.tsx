@@ -318,15 +318,15 @@ export function CompareRunsDialog({
             <div className="space-y-6 animate-in fade-in duration-200 text-text-primary">
               
               {/* Run pair header */}
-              <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-white/10">
-                <div className="text-xs text-gray-300 font-medium">
-                  <span className="font-bold text-white bg-white/10 px-2.5 py-1 rounded-md border border-white/15">{runLabel(result.run_a_id)}</span>
+              <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-[var(--color-border)]">
+                <div className="text-xs text-[var(--color-text-muted)] font-medium">
+                  <span className="font-bold text-[var(--color-text-primary)] bg-[var(--color-surface-2)] px-2.5 py-1 rounded-md border border-[var(--color-border)]">{runLabel(result.run_a_id)}</span>
                   <span className="mx-2 font-black text-purple-400">VS</span>
-                  <span className="font-bold text-white bg-white/10 px-2.5 py-1 rounded-md border border-white/15">{runLabel(result.run_b_id)}</span>
+                  <span className="font-bold text-[var(--color-text-primary)] bg-[var(--color-surface-2)] px-2.5 py-1 rounded-md border border-[var(--color-border)]">{runLabel(result.run_b_id)}</span>
                 </div>
                 <button
                   onClick={handleReset}
-                  className="text-xs font-bold text-gray-300 hover:text-white flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg transition-all cursor-pointer shadow-sm"
+                  className="text-xs font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] flex items-center gap-1.5 bg-[var(--color-surface-2)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border)] px-3 py-1.5 rounded-lg transition-all cursor-pointer shadow-sm"
                 >
                   <RotateCcw className="w-3 h-3" /> New comparison
                 </button>
@@ -338,43 +338,43 @@ export function CompareRunsDialog({
                   <span className="text-xs font-black tracking-widest uppercase text-amber-300 block bg-amber-500/20 px-2.5 py-0.5 rounded border border-amber-400/30 w-fit flex items-center gap-1.5">
                     <Trophy size={14} className="text-amber-300" /> Champion Verdict
                   </span>
-                  <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight leading-snug">
+                  <h3 className="text-lg sm:text-xl font-extrabold text-[var(--color-text-primary)] tracking-tight leading-snug">
                     {result.better_run || 'Both runs achieved equivalent statistical performance.'}
                   </h3>
-                  <p className="text-sm text-gray-200 font-medium leading-relaxed">
+                  <p className="text-sm text-[var(--color-text-secondary)] font-medium leading-relaxed">
                     {cleanCompareSentence(result.overall_summary, 190)}
                   </p>
                 </div>
-                <div className="shrink-0 bg-black/50 border border-white/20 rounded-xl p-4 max-w-xs space-y-2 shadow-inner text-xs">
-                  <span className="font-bold text-white uppercase text-[11px] tracking-wider block flex items-center gap-1.5">
+                <div className="shrink-0 bg-black/50 border border-[var(--color-border)] rounded-xl p-4 max-w-xs space-y-2 shadow-inner text-xs">
+                  <span className="font-bold text-[var(--color-text-primary)] uppercase text-[11px] tracking-wider block flex items-center gap-1.5">
                     <Lightbulb size={13} className="text-indigo-400" /> Next Iteration Goal:
                   </span>
-                  <p className="text-gray-200 font-medium leading-relaxed">
+                  <p className="text-[var(--color-text-secondary)] font-medium leading-relaxed">
                     {cleanCompareSentence(result.next_recommendation, 130)}
                   </p>
                 </div>
               </div>
 
               {/* Metric Comparison Table */}
-              <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-5 shadow-md">
-                <div className="flex items-center gap-2 mb-3 text-white font-bold text-sm uppercase tracking-wider border-b border-white/10 pb-2">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.03] p-5 shadow-md">
+                <div className="flex items-center gap-2 mb-3 text-[var(--color-text-primary)] font-bold text-sm uppercase tracking-wider border-b border-[var(--color-border)] pb-2">
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
                   <span>Metric Differentials</span>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[360px]">
                     <thead>
-                      <tr className="border-b border-white/10">
-                        <th className="pb-2 pr-4 text-left text-xs font-extrabold text-gray-300 uppercase tracking-wider">
+                      <tr className="border-b border-[var(--color-border)]">
+                        <th className="pb-2 pr-4 text-left text-xs font-extrabold text-[var(--color-text-muted)] uppercase tracking-wider">
                           Metric Name
                         </th>
-                        <th className="pb-2 pr-4 text-center text-xs font-extrabold text-gray-300 uppercase tracking-wider">
+                        <th className="pb-2 pr-4 text-center text-xs font-extrabold text-[var(--color-text-muted)] uppercase tracking-wider">
                           Run A (Base)
                         </th>
-                        <th className="pb-2 pr-4 text-center text-xs font-extrabold text-gray-300 uppercase tracking-wider">
+                        <th className="pb-2 pr-4 text-center text-xs font-extrabold text-[var(--color-text-muted)] uppercase tracking-wider">
                           Run B (Challenger)
                         </th>
-                        <th className="pb-2 text-right text-xs font-extrabold text-gray-300 uppercase tracking-wider">
+                        <th className="pb-2 text-right text-xs font-extrabold text-[var(--color-text-muted)] uppercase tracking-wider">
                           Net Delta
                         </th>
                       </tr>
@@ -394,22 +394,22 @@ export function CompareRunsDialog({
 
               {/* 2-Column Concise Developer Pros/Cons Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="rounded-xl border border-white/15 bg-white/[0.03] p-4 flex flex-col justify-between shadow-md hover:bg-white/[0.06] transition-all">
+                <div className="rounded-xl border border-[var(--color-border)] bg-white/[0.03] p-4 flex flex-col justify-between shadow-md hover:bg-white/[0.06] transition-all">
                   <div className="space-y-1.5">
                     <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                       <TrendingUp className="w-4 h-4 text-emerald-400" /> Key Architectural Gains
                     </span>
-                    <p className="text-xs sm:text-sm font-medium text-gray-200 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-medium text-[var(--color-text-secondary)] leading-relaxed">
                       {cleanCompareSentence(result.key_improvements, 150)}
                     </p>
                   </div>
                 </div>
-                <div className="rounded-xl border border-white/15 bg-white/[0.03] p-4 flex flex-col justify-between shadow-md hover:bg-white/[0.06] transition-all">
+                <div className="rounded-xl border border-[var(--color-border)] bg-white/[0.03] p-4 flex flex-col justify-between shadow-md hover:bg-white/[0.06] transition-all">
                   <div className="space-y-1.5">
                     <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                       <AlertTriangle className="w-4 h-4 text-amber-400" /> Latency & Tradeoffs
                     </span>
-                    <p className="text-xs sm:text-sm font-medium text-gray-200 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-medium text-[var(--color-text-secondary)] leading-relaxed">
                       {cleanCompareSentence(result.tradeoffs, 150)}
                     </p>
                   </div>
@@ -420,7 +420,7 @@ export function CompareRunsDialog({
               <div className="flex justify-center pt-2">
                 <button
                   onClick={() => setShowFullComparison(!showFullComparison)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/20 bg-white/10 text-xs sm:text-sm font-bold text-gray-200 hover:text-white hover:bg-white/15 transition-all shadow-md cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] text-xs sm:text-sm font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-white/15 transition-all shadow-md cursor-pointer"
                 >
                   <span>{showFullComparison ? 'Hide Full Comparative Analysis' : 'Show Full Comparative Analysis'}</span>
                   {showFullComparison ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -428,29 +428,29 @@ export function CompareRunsDialog({
               </div>
 
               {showFullComparison && (
-                <div className="pt-5 border-t border-white/15 space-y-4 animate-in slide-in-from-top-2 duration-200 text-sm">
-                  <div className="bg-black/40 border border-white/15 rounded-2xl p-5 space-y-4">
+                <div className="pt-5 border-t border-[var(--color-border)] space-y-4 animate-in slide-in-from-top-2 duration-200 text-sm">
+                  <div className="bg-black/40 border border-[var(--color-border)] rounded-2xl p-5 space-y-4">
                     <div>
                       <span className="text-xs font-extrabold uppercase text-gray-400 tracking-wider block mb-1">Full Executive Summary:</span>
-                      <p className="text-gray-200 leading-relaxed font-normal">{result.overall_summary}</p>
+                      <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.overall_summary}</p>
                     </div>
-                    <div className="pt-3 border-t border-white/10">
+                    <div className="pt-3 border-t border-[var(--color-border)]">
                       <span className="text-xs font-extrabold uppercase text-purple-300 tracking-wider block mb-1">Configuration Divergence Analysis:</span>
-                      <p className="text-gray-200 leading-relaxed font-normal">{result.configuration_analysis}</p>
+                      <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.configuration_analysis}</p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-white/10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-[var(--color-border)]">
                       <div>
                         <span className="text-xs font-extrabold uppercase text-emerald-400 tracking-wider block mb-1">Complete Improvements:</span>
-                        <p className="text-gray-200 leading-relaxed font-normal">{result.key_improvements}</p>
+                        <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.key_improvements}</p>
                       </div>
                       <div>
                         <span className="text-xs font-extrabold uppercase text-amber-400 tracking-wider block mb-1">Complete Tradeoffs:</span>
-                        <p className="text-gray-200 leading-relaxed font-normal">{result.tradeoffs}</p>
+                        <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.tradeoffs}</p>
                       </div>
                     </div>
-                    <div className="pt-3 border-t border-white/10">
+                    <div className="pt-3 border-t border-[var(--color-border)]">
                       <span className="text-xs font-extrabold uppercase text-blue-400 tracking-wider block mb-1">Next Step Strategy:</span>
-                      <p className="text-gray-200 leading-relaxed font-normal">{result.next_recommendation}</p>
+                      <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.next_recommendation}</p>
                     </div>
                   </div>
                 </div>

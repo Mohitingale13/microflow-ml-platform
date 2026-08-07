@@ -135,6 +135,12 @@ class DatasetAIService:
         )
         logger.info("Created and cached AI dataset intelligence analysis for dataset %s", dataset_id)
 
+        try:
+            from app.services.embedding_service import EmbeddingService
+            EmbeddingService(gemini_service=self._gemini_service).index_dataset_analysis(db, record, dataset)
+        except Exception as exc:
+            logger.warning("Embedding indexing failed for Dataset Analysis %s: %s", record.id, exc)
+
         return self._to_response_schema(record, parsed, is_cached=False)
 
     def _calculate_quality_score(

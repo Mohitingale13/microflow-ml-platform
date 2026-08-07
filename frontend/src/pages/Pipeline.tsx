@@ -93,8 +93,12 @@ export function Pipeline() {
 
       {/* ── Tab Navigation ── */}
       <div style={{
-        display: 'flex', gap: '0.25rem',
-        borderBottom: '1px solid var(--border)',
+        display: 'flex', gap: '0.5rem',
+        padding: '0.25rem',
+        background: 'var(--color-surface-2)',
+        borderRadius: 'var(--radius-md)',
+        width: 'fit-content',
+        border: '1px solid var(--color-border)',
         marginBottom: '1.5rem',
       }}>
         {TABS.map(tab => {
@@ -106,18 +110,19 @@ export function Pipeline() {
               onClick={() => setActiveTab(tab.id)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '0.45rem',
-                padding: '0.65rem 1rem',
-                background: 'none', border: 'none',
-                borderBottom: isActive ? '2px solid var(--accent)' : '2px solid transparent',
-                marginBottom: -1,
-                color: isActive ? 'var(--accent)' : 'var(--text-muted)',
-                fontWeight: isActive ? 700 : 500,
+                padding: '0.5rem 1rem',
+                background: isActive ? 'var(--color-surface)' : 'transparent',
+                border: 'none',
+                borderRadius: 'calc(var(--radius-md) - 2px)',
+                color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+                fontWeight: isActive ? 700 : 600,
                 fontSize: '0.85rem',
                 cursor: 'pointer',
-                transition: 'color 0.15s',
+                transition: 'all 0.15s',
+                boxShadow: isActive ? 'var(--shadow-sm)' : 'none',
               }}
             >
-              <Icon size={15} />
+              <Icon size={15} style={{ color: isActive ? 'var(--color-accent-purple)' : 'inherit' }} />
               {tab.label}
             </button>
           );

@@ -27,6 +27,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 
+from app.services.ai_evaluation_service import AIEvaluationService
+
 def get_ai_query_service() -> AIQueryService:
     return AIQueryService(
         query_repo=AIQueryRepository(),
@@ -36,6 +38,27 @@ def get_ai_query_service() -> AIQueryService:
         run_result_repo=RunResultRepository(),
         gemini_service=GeminiService(),
     )
+
+
+def get_ai_evaluation_service() -> AIEvaluationService:
+    return AIEvaluationService(
+        query_repo=AIQueryRepository(),
+        gemini_service=GeminiService(),
+    )
+
+
+@router.post("/evaluate", response_model=ApiResponse)
+def trigger_ragas_evaluation(
+    limit: int = 10,
+    db: Session = Depends(get_db),
+    service: AIEvaluationService = Depends(get_ai_evaluation_service),
+) -> ApiResponse:
+    """
+    Manually trigger a batch evaluation of recent assistant queries.
+    This will score the Context Relevance, Faithfulness, and Answer Relevance.
+    """
+    evaluated_count = service.evaluate_batch(limit=limit, db=db)
+    return ApiResponse.ok(data={"evaluated_count": evaluated_count}, message=f"Evaluated {evaluated_count} queries.")
 
 
 @router.post("/query", response_model=ApiResponse)

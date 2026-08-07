@@ -71,7 +71,7 @@ export function PreviewTable({ preview }: PreviewTableProps) {
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
             {table.getRowModel().rows.map(row => (
-              <tr key={row.id} className="hover:bg-white/5 transition-colors">
+              <tr key={row.id} className="hover:bg-[var(--color-surface-2)] transition-colors">
                 {row.getVisibleCells().map(cell => (
                   <td key={cell.id} className="px-4 py-2 text-sm text-text-primary border-r border-border last:border-r-0 whitespace-nowrap">
                     {flexRender(

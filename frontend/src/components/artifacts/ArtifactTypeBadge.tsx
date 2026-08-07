@@ -1,4 +1,4 @@
-import { FileCode, Cpu, BarChart2, CheckCircle, Sliders, Table } from 'lucide-react';
+import { FileCode, Cpu, BarChart2, CheckCircle, Sliders, Table, Activity, Eye, FileJson } from 'lucide-react';
 import type { ArtifactType } from '@/types/artifact.types';
 
 interface ArtifactTypeBadgeProps {
@@ -51,6 +51,48 @@ const TYPE_CONFIG: Record<
     text: 'text-indigo-400',
     border: 'border-indigo-500/20',
     icon: FileCode,
+  },
+  shap_summary_png: {
+    label: 'SHAP Summary',
+    bg: 'bg-fuchsia-500/10',
+    text: 'text-fuchsia-400',
+    border: 'border-fuchsia-500/20',
+    icon: Eye,
+  },
+  feature_importance_png: {
+    label: 'Feature Importance Plot',
+    bg: 'bg-pink-500/10',
+    text: 'text-pink-400',
+    border: 'border-pink-500/20',
+    icon: BarChart2,
+  },
+  shap_dependence_png: {
+    label: 'SHAP Dependence',
+    bg: 'bg-rose-500/10',
+    text: 'text-rose-400',
+    border: 'border-rose-500/20',
+    icon: Activity,
+  },
+  shap_values_json: {
+    label: 'SHAP Values',
+    bg: 'bg-orange-500/10',
+    text: 'text-orange-400',
+    border: 'border-orange-500/20',
+    icon: FileJson,
+  },
+  feature_importance_json: {
+    label: 'Feature Importance JSON',
+    bg: 'bg-orange-500/10',
+    text: 'text-orange-400',
+    border: 'border-orange-500/20',
+    icon: FileJson,
+  },
+  explainability_summary_json: {
+    label: 'Explainability Summary',
+    bg: 'bg-violet-500/10',
+    text: 'text-violet-400',
+    border: 'border-violet-500/20',
+    icon: Eye,
   },
 };
 

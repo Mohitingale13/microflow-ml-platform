@@ -187,6 +187,31 @@ class GeminiService:
         """Send prompt to Gemini to formulate AI Experiment Strategy."""
         return self._generate_with_retry(prompt, "generate_experiment_strategy")
 
+    def generate_evaluation(self, prompt: str) -> str:
+        """Send prompt to Gemini to evaluate RAG answer strictly (RAGAS)."""
+        return self._generate_with_retry(prompt, "generate_evaluation")
+
+    def generate_embedding(self, text: str) -> list[float]:
+        """Generate 768-dimensional embedding vector using Google's text-embedding-004 model."""
+        if not text or not text.strip():
+            return [0.0] * 768
+        client = self._get_client()
+        try:
+            res = client.models.embed_content(
+                model="text-embedding-004",
+                contents=text.strip(),
+            )
+            if hasattr(res, "embedding") and hasattr(res.embedding, "values"):
+                return list(res.embedding.values)
+            elif isinstance(res, dict) and "embedding" in res:
+                return list(res["embedding"]["values"])
+            elif hasattr(res, "embeddings") and len(res.embeddings) > 0:
+                return list(res.embeddings[0].values)
+            raise ValueError(f"Unexpected embed_content response structure: {res}")
+        except Exception as exc:
+            logger.error("Failed to generate embedding via text-embedding-004: %s", exc)
+            return [0.0] * 768
+
     @property
     def model_name(self) -> str:
         return MODEL_NAME

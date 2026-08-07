@@ -132,6 +132,12 @@ class ExperimentStrategyService:
                 updated_at=datetime.now(timezone.utc),
             )
 
+        try:
+            from app.services.embedding_service import EmbeddingService
+            EmbeddingService(gemini_service=self._gemini_service).index_ai_strategy(db, record, experiment)
+        except Exception as exc:
+            logger.warning("Embedding indexing failed for AI Strategy %s: %s", record.id, exc)
+
         return self._to_response_schema(record, parsed, is_cached=False, evidence_summary=evidence_summary)
 
     def _compute_history_hash(self, runs: list[Any], dataset_version: str | int) -> str:
@@ -240,8 +246,8 @@ class ExperimentStrategyService:
         if timed_runs:
             f_run = min(timed_runs, key=lambda x: x.result.execution_time_seconds)
             s_run = max(timed_runs, key=lambda x: x.result.execution_time_seconds)
-            fastest_model = f"Run #{f_run.run_number} ({self._normalize_model_name(f_run.model_type)}) - {f_run.result.execution_time_seconds:.2f}s"
-            slowest_model = f"Run #{s_run.run_number} ({self._normalize_model_name(s_run.model_type)}) - {s_run.result.execution_time_seconds:.2f}s"
+            fastest_model = f"Experiment: {experiment.name} — Run #{f_run.run_number} ({self._normalize_model_name(f_run.model_type)}) - {f_run.result.execution_time_seconds:.2f}s"
+            slowest_model = f"Experiment: {experiment.name} — Run #{s_run.run_number} ({self._normalize_model_name(s_run.model_type)}) - {s_run.result.execution_time_seconds:.2f}s"
 
         # E. Configurations already tested & Search space coverage
         evaluated_families = set()
@@ -253,7 +259,7 @@ class ExperimentStrategyService:
             evaluated_families.add(fam)
             cfg = r.training_configuration or r.result.training_config_snapshot or {}
             config_summaries.append({
-                "run_number": r.run_number,
+                "run_name": f"Experiment: {experiment.name} — Run #{r.run_number}",
                 "model": fam,
                 "accuracy": round(r.result.accuracy, 4),
                 "f1_score": round(r.result.f1_score, 4),
