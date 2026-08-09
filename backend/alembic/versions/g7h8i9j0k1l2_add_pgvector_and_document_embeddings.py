@@ -10,6 +10,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+# pyrefly: ignore [missing-import]
 from pgvector.sqlalchemy import Vector
 
 # revision identifiers, used by Alembic.

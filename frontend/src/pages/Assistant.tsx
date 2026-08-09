@@ -250,7 +250,7 @@ export function Assistant() {
                 Q
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                <h2 className="text-lg font-bold text-[var(--color-text-primary)] dark:text-gray-100">
                   "{activeResponse.question}"
                 </h2>
               </div>
@@ -271,7 +271,7 @@ export function Assistant() {
                 <span className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 font-bold">
                   <CheckCircle2 size={20} />
                 </span>
-                <h3 className="font-bold text-base tracking-wide text-gray-900 dark:text-gray-100">
+                <h3 className="font-bold text-base tracking-wide text-[var(--color-text-primary)] dark:text-gray-100">
                   Analysis & Findings
                 </h3>
               </div>
@@ -286,11 +286,11 @@ export function Assistant() {
                 <span className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
                   <Cpu size={18} />
                 </span>
-                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-700 dark:text-[var(--color-text-muted)]">
+                <h3 className="font-bold text-sm uppercase tracking-wider text-[var(--color-text-primary)] dark:text-gray-200">
                   Reasoning
                 </h3>
               </div>
-              <p className="text-gray-700 dark:text-[var(--color-text-muted)] text-sm leading-relaxed whitespace-pre-wrap">
+              <p className="text-[var(--color-text-primary)] dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
                 {activeResponse.reasoning}
               </p>
             </div>
@@ -301,26 +301,26 @@ export function Assistant() {
                 <span className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
                   <Database size={18} />
                 </span>
-                <h3 className="font-bold text-sm uppercase tracking-wider text-gray-700 dark:text-[var(--color-text-muted)]">
+                <h3 className="font-bold text-sm uppercase tracking-wider text-[var(--color-text-primary)] dark:text-gray-200">
                   Telemetry Evidence
                 </h3>
               </div>
-              <p className="text-gray-700 dark:text-[var(--color-text-muted)] text-sm leading-relaxed font-mono text-xs whitespace-pre-wrap bg-gray-50 dark:bg-[var(--color-surface-2)]/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+              <p className="text-[var(--color-text-primary)] dark:text-gray-300 text-sm leading-relaxed font-mono text-xs whitespace-pre-wrap bg-gray-50 dark:bg-[var(--color-surface-2)]/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
                 {activeResponse.supporting_data}
               </p>
             </div>
 
             {/* 4. Recommendation */}
-            <div className="md:col-span-2 bg-gradient-to-r from-amber-50/50 to-orange-50/50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-900/60 rounded-2xl p-5 shadow-sm">
-              <div className="flex items-center gap-2.5 pb-3 mb-3 border-b border-amber-200/60 dark:border-amber-900/40">
-                <span className="p-2 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">
+            <div className="md:col-span-2 bg-white dark:bg-[var(--color-surface)] border border-gray-200 dark:border-gray-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2.5 pb-3 mb-3 border-b border-gray-100 dark:border-gray-800">
+                <span className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 font-bold">
                   <Lightbulb size={18} />
                 </span>
-                <h3 className="font-bold text-sm uppercase tracking-wider text-amber-900 dark:text-amber-300">
+                <h3 className="font-bold text-sm uppercase tracking-wider text-[var(--color-text-primary)] dark:text-gray-200">
                   Suggested Next Step
                 </h3>
               </div>
-              <p className="text-gray-800 dark:text-[var(--color-text-secondary)] text-sm leading-relaxed whitespace-pre-wrap font-medium">
+              <p className="text-[var(--color-text-primary)] dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap font-medium">
                 {activeResponse.recommendation || "No further action required."}
               </p>
             </div>

@@ -285,8 +285,8 @@ export function RunDetail() {
       )}
 
       {/* Tabs */}
-      <div className="mb-6 w-full overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex gap-2 items-center min-w-max">
+      <div className="mb-6 w-full">
+        <div className="flex flex-wrap gap-2 items-center">
           {tabs.map((tab) => (
             <button
               key={tab.id}
