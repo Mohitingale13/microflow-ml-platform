@@ -8,6 +8,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.2-3178C6?style=flat&logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat&logo=postgresql&logoColor=white)
 ![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI_Engine-4285F4?style=flat&logo=google&logoColor=white)
+![Agentic AI](https://img.shields.io/badge/Agentic_AI-Autonomous_ML_Agent-FF3366?style=flat&logo=robot&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=flat&logo=docker&logoColor=white)
 <br>
 ![Vercel](https://img.shields.io/badge/Vercel-Frontend_Deployed-000000?style=flat&logo=vercel&logoColor=white)
@@ -25,7 +26,7 @@
 
 ![Demo Video](images/demo_video.webp)
 
-**A full-stack ML experimentation and observability platform with an integrated AI engineering co-pilot.**
+**A full-stack ML experimentation and observability platform powered by an Agentic AI engineering co-pilot.**
 
 ### Platform Features
 - Dataset Management with AI Insights
@@ -55,7 +56,8 @@ The platform is aimed at ML engineers, data scientists, and research engineers w
 - Full-stack ML platform — FastAPI + React + PostgreSQL
 - 264+ automated backend tests, all passing
 - Dockerized, three-container deployment (Nginx + FastAPI + PostgreSQL/pgvector)
-- Complete AI Engineering Suite powered by Google Gemini 3.6 Flash
+- Complete **Agentic AI Engineering Suite** powered by Google Gemini 3.6 Flash
+- **Autonomous AI Investigator** capable of bounded multi-step reasoning and dynamic tool execution
 - Automatic exponential backoff & multi-model fallback for AI resilience
 - SHA-256 deterministic caching for all AI responses
 - LLM-as-a-Judge Evaluation Layer (RAGAS) with intelligent retry and state tracking
