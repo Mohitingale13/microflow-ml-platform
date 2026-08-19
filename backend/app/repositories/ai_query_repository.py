@@ -32,10 +32,10 @@ class AIQueryRepository:
         )
 
     def get_unevaluated(self, limit: int, db: Session) -> list[AIQueryCache]:
-        """Return cached queries that have not yet been evaluated by RAGAS."""
+        """Return cached queries that have not yet been evaluated by RAGAS (status == pending)."""
         return (
             db.query(AIQueryCache)
-            .filter(AIQueryCache.context_relevance_score.is_(None))
+            .filter(AIQueryCache.evaluation_status == "pending")
             .order_by(AIQueryCache.created_at.asc())
             .limit(limit)
             .all()
@@ -54,6 +54,9 @@ class AIQueryRepository:
         reasoning: str,
         supporting_data: str,
         recommendation: str,
+        evaluation_status: str = "pending",
+        evaluation_retries: int = 0,
+        evaluation_error: str | None = None,
     ) -> AIQueryCache:
         record = AIQueryCache(
             query_hash=query_hash,
@@ -65,6 +68,9 @@ class AIQueryRepository:
             reasoning=reasoning,
             supporting_data=supporting_data,
             recommendation=recommendation or "",
+            evaluation_status=evaluation_status,
+            evaluation_retries=evaluation_retries,
+            evaluation_error=evaluation_error,
         )
         db.add(record)
         db.commit()

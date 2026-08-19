@@ -1,6 +1,9 @@
 import os
 from sqlalchemy import create_engine, text
 
+import app.models
+from app.db.base import Base
+
 def fix_db():
     db_url = os.environ.get("DATABASE_URL")
     if not db_url:
@@ -13,6 +16,21 @@ def fix_db():
     print(f"Connecting to database to apply schema fixes...")
     engine = create_engine(db_url)
     
+    # 1. Create vector extension
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+    except Exception as e:
+        print(f"Could not create vector extension: {e}")
+
+    # 2. Create tables
+    print("Creating tables to satisfy Alembic...")
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Could not create tables: {e}")
+
+    # 3. Manual checks
     with engine.begin() as conn:
         # 1. RAGAS columns
         try:
@@ -40,7 +58,10 @@ def fix_db():
             versions = [row[0] for row in result]
             buggy_versions = ["c3d4e5f6a7b8", "d4e5f6a7b8c9", "e5f6a7b8c9d0", "f6a7b8c9d0e1", "96c25a0c4cd8", "a299078d4c6a", "b0107acce356", "g7h8i9j0k1l2"]
             
-            if len(versions) == 0 or any(v in versions for v in buggy_versions):
+            if len(versions) == 0:
+                conn.execute(text("INSERT INTO alembic_version (version_num) VALUES ('1cd59f8a341b');"))
+                print("Fresh database stamped to 1cd59f8a341b.")
+            elif any(v in versions for v in buggy_versions):
                 conn.execute(text("DELETE FROM alembic_version;"))
                 conn.execute(text("INSERT INTO alembic_version (version_num) VALUES ('0bc48e7b232a');"))
                 print(f"Alembic history upgraded from {versions} to latest (0bc48e7b232a).")

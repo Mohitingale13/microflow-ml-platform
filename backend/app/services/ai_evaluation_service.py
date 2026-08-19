@@ -7,13 +7,20 @@ Uses Gemini as a Judge to score:
 3. Answer Relevance
 """
 
+from __future__ import annotations
+
 import json
 import logging
+from typing import TYPE_CHECKING
 from sqlalchemy.orm import Session
-from app.ai.gemini_service import GeminiService
 from app.repositories.ai_query_repository import AIQueryRepository
 
+if TYPE_CHECKING:
+    from app.ai.gemini_service import GeminiService
+
 logger = logging.getLogger(__name__)
+
+MAX_EVALUATION_ATTEMPTS: int = 3
 
 EVALUATION_PROMPT = """
 You are an expert AI evaluator grading a Retrieval-Augmented Generation (RAG) system.
@@ -43,6 +50,7 @@ Output STRICTLY in this JSON format:
 }}
 """
 
+
 class AIEvaluationService:
     def __init__(self, query_repo: AIQueryRepository, gemini_service: GeminiService):
         self._query_repo = query_repo
@@ -58,6 +66,7 @@ class AIEvaluationService:
             return 0
 
         evaluated_count = 0
+        has_updates = False
 
         for record in unevaluated:
             prompt = EVALUATION_PROMPT.format(
@@ -82,16 +91,26 @@ class AIEvaluationService:
                 record.faithfulness_score = float(result.get("faithfulness_score", 0.0))
                 record.answer_relevance_score = float(result.get("answer_relevance_score", 0.0))
                 record.evaluation_reasoning = str(result.get("evaluation_reasoning", "No reasoning provided."))
+                record.evaluation_status = "completed"
+                record.evaluation_error = None
                 
                 db.add(record)
                 evaluated_count += 1
+                has_updates = True
             except Exception as e:
-                logger.error(f"Failed to evaluate query {record.id}: {e}")
-                # We skip this record, but don't crash the whole batch
-                continue
+                error_msg = str(e)
+                logger.error(f"Failed to evaluate query {record.id}: {error_msg}")
+                record.evaluation_retries += 1
+                record.evaluation_error = error_msg
+                if record.evaluation_retries >= MAX_EVALUATION_ATTEMPTS:
+                    record.evaluation_status = "failed"
+                else:
+                    record.evaluation_status = "pending"
+                db.add(record)
+                has_updates = True
         
-        # Commit the batch
-        if evaluated_count > 0:
+        # Commit the batch if any records were updated (evaluated or retried/failed)
+        if has_updates:
             db.commit()
 
         return evaluated_count
