@@ -38,6 +38,12 @@ def run_explainability(
     logger.info("Calculating SHAP values...")
     shap_values = explainer(X_bg)
 
+    # FIX: For binary classification models (like Random Forest) that output 3D SHAP values [samples, features, classes],
+    # slice the Explanation object to only use the positive class (class 1) for plotting and summary.
+    if len(shap_values.shape) == 3 and shap_values.shape[-1] == 2:
+        logger.info("Binary classification detected in SHAP values. Selecting positive class for explainability.")
+        shap_values = shap_values[..., 1]
+
     model_family = type(estimator).__name__
     
     logger.info("Generating Explainability Summary...")

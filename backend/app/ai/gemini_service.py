@@ -10,20 +10,22 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Optional
+from typing import Any, Optional
 
 from google import genai  # type: ignore
+from google.genai import types  # type: ignore
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = "gemini-3.6-flash"
+MODEL_NAME = "gemini-2.5-flash"
 FALLBACK_MODELS = [
-    "gemini-3.5-flash",
-    "gemini-3-flash",
-    "gemini-2.5-flash",
+    "gemini-3.5-flash-lite",
     "gemini-2.5-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-3.0-flash",
+    "gemini-3.6-flash",
 ]
 
 
@@ -40,57 +42,79 @@ class GeminiService:
         self._model_cooldowns: dict[str, float] = {}
 
     def _get_client(self) -> genai.Client:
-        """Configure the SDK with the API key from settings (once)."""
-        if self._client:
+        """Lazily initialize and return the genai.Client."""
+        if self._client is not None:
             return self._client
-        if not settings.GEMINI_API_KEY:
+
+        api_key = settings.GEMINI_API_KEY
+        if not api_key:
             raise RuntimeError(
-                "GEMINI_API_KEY is not set. "
-                "Add it to backend/.env or as an environment variable on your hosting platform. "
-                "Obtain a key at https://aistudio.google.com/app/apikey"
+                "GEMINI_API_KEY is not set. Please set it in your environment or .env file."
             )
-        self._client = genai.Client(api_key=settings.GEMINI_API_KEY)
+
+        self._client = genai.Client(api_key=api_key)
+        logger.info("Initialized Gemini Client with model: %s", MODEL_NAME)
         return self._client
 
     def _generate_with_retry(self, prompt: str, operation_name: str) -> str:
         """
-        Executes generation against Gemini with automatic retries for 503 / high demand
-        temporary traffic spikes, plus instant failover and smart cooldowns for quota limits.
+        Execute generate_content with progressive exponential backoff and fallback models.
+        """
+        response = self.generate_chat_turn(
+            contents=prompt,
+            operation_name=operation_name,
+        )
+        return response.text or ""
+
+    def generate_chat_turn(
+        self,
+        contents: list[Any] | str,
+        tools: list[Any] | None = None,
+        system_instruction: str | None = None,
+        operation_name: str = "agent_turn",
+    ) -> Any:
+        """
+        Send contents and optional tools/system instruction to Gemini with full retry and failover resilience.
+        Returns the raw generate_content response object.
         """
         client = self._get_client()
         max_attempts = 3
         all_models = [MODEL_NAME] + FALLBACK_MODELS
 
-        # Filter out models currently on cooldown from previous quota or rate limits
         now = time.time()
         models_to_try = [m for m in all_models if now >= self._model_cooldowns.get(m, 0)]
         if not models_to_try:
-            # If all models are on cooldown, try them anyway so we don't deadlock if timers expire soon
             models_to_try = all_models
 
         last_exc: Optional[Exception] = None
 
+        config_kwargs: dict[str, Any] = {}
+        if system_instruction:
+            config_kwargs["system_instruction"] = system_instruction
+        if tools:
+            config_kwargs["tools"] = tools
+
+        config = types.GenerateContentConfig(**config_kwargs) if config_kwargs else None
+
         for model in models_to_try:
             for attempt in range(1, max_attempts + 1):
                 try:
-                    response = client.models.generate_content(
-                        model=model,
-                        contents=prompt
-                    )
-                    raw_text: str = response.text or ""
+                    kwargs: dict[str, Any] = {"model": model, "contents": contents}
+                    if config:
+                        kwargs["config"] = config
+
+                    response = client.models.generate_content(**kwargs)
                     logger.info(
-                        "Gemini [%s] generated successfully via model %s on attempt %d (chars=%d)",
+                        "Gemini [%s] turn completed via model %s (attempt %d)",
                         operation_name,
                         model,
                         attempt,
-                        len(raw_text),
                     )
-                    return raw_text
+                    return response
                 except Exception as exc:
                     last_exc = exc
                     exc_str = str(exc).lower()
 
-                    # 1) Instant Quota / Rate-Limit Failover (Zero sleep delay on 429 quota exhaustion)
                     is_quota = (
                         "429" in exc_str
                         or "resource exhausted" in exc_str
@@ -100,19 +124,17 @@ class GeminiService:
                     )
 
                     if is_quota:
-                        # Determine cooldown period: 6 hours for daily quota ceilings, 60s for minute RPM ceilings
                         is_daily = "perday" in exc_str or "day" in exc_str or "daily" in exc_str
                         cooldown_secs = 21600.0 if is_daily else 60.0
                         self._model_cooldowns[model] = time.time() + cooldown_secs
                         logger.warning(
-                            "Model %s hit quota/rate limit during [%s]. Placing on cooldown for %ds and failing over instantly in 0ms...",
+                            "Model %s hit quota/rate limit during [%s]. Placing on cooldown for %ds and failing over...",
                             model,
                             operation_name,
                             int(cooldown_secs),
                         )
-                        break  # Break attempt loop immediately to jump to next model with zero delay!
+                        break
 
-                    # 2) Transient Server Spike (503 / High Demand / Timeout) -> exponential backoff retry
                     is_transient = (
                         "503" in exc_str
                         or "unavailable" in exc_str
@@ -123,8 +145,7 @@ class GeminiService:
                     if is_transient and attempt < max_attempts:
                         backoff_seconds = 1.5 * (2 ** (attempt - 1))
                         logger.warning(
-                            "Transient Gemini server spike (%s) on [%s] (model %s, attempt %d/%d). "
-                            "Retrying in %.1f seconds...",
+                            "Transient Gemini server spike (%s) on [%s] (model %s, attempt %d/%d). Retrying in %.1f seconds...",
                             type(exc).__name__,
                             operation_name,
                             model,
@@ -135,19 +156,16 @@ class GeminiService:
                         time.sleep(backoff_seconds)
                         continue
                     elif is_transient and model != models_to_try[-1]:
-                        # Move to fallback model if current model stays congested
                         logger.warning(
                             "Model %s remains congested for [%s]. Switching to fallback model...",
                             model,
-                            operation_name
+                            operation_name,
                         )
                         break
                     else:
-                        # Non-transient error or exhausted all retries and fallbacks
                         logger.error("Gemini API call failed for [%s]: %s", operation_name, exc)
                         break
 
-        # If we get here, all retries and fallbacks failed
         exc_str = str(last_exc).lower() if last_exc else ""
         if "503" in exc_str or "high demand" in exc_str or "unavailable" in exc_str:
             raise RuntimeError(

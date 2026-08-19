@@ -307,6 +307,15 @@ Responsibilities
 - **AI Run Review & Comparison**: On-demand peer reviews and deep comparisons of model runs.
 - **Resilience**: Exponential backoff, multi-model fallback, deterministic SHA-256 caching.
 - **Evaluation**: RAGAS-based LLM-as-a-judge (Context Relevance, Faithfulness, Answer Relevance).
+- **Experiment Investigator Agent**: A bounded, read-only AI investigation agent.
+  - Analyzes natural language ML investigation objectives.
+  - Dynamically queries exactly 5 bounded read-only tools: `get_experiment_runs`, `get_run_config`, `get_run_metrics`, `compare_runs`, `get_feature_importance`.
+  - Native Gemini function calling.
+  - Operates within a hard-capped MAX_AGENT_ITERATIONS = 5 limit.
+  - Request-scoped state (no persistent agent memory).
+  - No write/update/delete tools.
+  - No arbitrary SQL access.
+  - Outputs a structured `InvestigationReport`.
 
 ---
 
@@ -481,8 +490,6 @@ Docker
 These known issues reflect areas where the current code deviates from intended specifications:
 
 - **Synchronous Training Execution:** The `training_service.execute()` method currently blocks the FastAPI thread synchronously. While the specification intends for asynchronous training, the current implementation relies on a hardcoded 2-minute API timeout from the frontend as a workaround.
-- **AI Evaluation Retry Loop:** The `ai_evaluation_service.py` batch processor swallows Gemini API exceptions without marking queries as `failed`, potentially leading to an infinite retry loop on poison pill queries.
-- **Lack of Schema Migrations:** Initialization uses `Base.metadata.create_all`. A proper migration tool (like Alembic) is needed.
 
 ---
 

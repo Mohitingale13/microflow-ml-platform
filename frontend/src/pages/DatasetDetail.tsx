@@ -118,12 +118,12 @@ export function DatasetDetail() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 sm:flex-initial flex items-center justify-center gap-2.5 py-2.5 px-5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 whitespace-nowrap select-none cursor-pointer ${isActive
                   ? isAI
-                    ? 'bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white shadow-md border border-purple-300/40'
+                    ? 'bg-purple-100 text-purple-700 shadow-sm border border-purple-200'
                     : 'bg-[var(--color-surface)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-sm'
                   : 'bg-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] border border-transparent'
                   }`}
               >
-                <span className={isActive && isAI ? 'text-purple-200 animate-pulse' : 'text-inherit opacity-80'}>
+                <span className={isActive && isAI ? 'text-purple-700 animate-pulse' : 'text-inherit opacity-80'}>
                   {tab.icon}
                 </span>
                 <span className="tracking-wide">{tab.label}</span>

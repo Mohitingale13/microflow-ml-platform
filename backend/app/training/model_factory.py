@@ -136,7 +136,7 @@ def _build_xgboost(config: dict[str, Any]):
 
     return XGBClassifier(
         n_estimators=int(config.get("n_estimators", 100)),
-        max_depth=int(config.get("max_depth", 6)),
+        max_depth=int(config["max_depth"]) if config.get("max_depth") is not None else None,
         learning_rate=float(config.get("learning_rate", 0.1)),
         random_state=int(config.get("random_state", config.get("seed", 42))),
         eval_metric="logloss",

@@ -10,6 +10,7 @@ import { RunTable } from '../components/experiments/RunTable';
 import { ConfigurationViewer } from '../components/experiments/ConfigurationViewer';
 import { ExperimentStatusBadge, RunStatusBadge } from '../components/experiments/RunStatusBadge';
 import { CreateRunModal } from '../components/experiments/CreateRunModal';
+import { InvestigatorModal } from '../components/experiments/InvestigatorModal';
 import { CompareRunsDialog } from '../components/experiments/CompareRunsDialog';
 import { ConfirmationDialog } from '../components/common/ConfirmationDialog';
 import { TableSkeleton } from '../components/common/LoadingSkeleton';
@@ -30,6 +31,7 @@ export function ExperimentDetail() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [isCreateRunOpen, setIsCreateRunOpen] = useState(false);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
+    const [isInvestigatorOpen, setIsInvestigatorOpen] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -120,7 +122,7 @@ export function ExperimentDetail() {
       </button>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-6 mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5 mb-6">
         <div className="flex items-start gap-4 min-w-0">
           <div className="w-11 h-11 rounded-lg bg-accent-blue/10 flex items-center justify-center shrink-0">
             <FlaskConical className="w-5 h-5 text-accent-blue" />
@@ -139,7 +141,7 @@ export function ExperimentDetail() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2 shrink-0 w-full lg:w-auto mt-2 lg:mt-0">
           {/* Compare Runs button — always visible, disabled when fewer than 2 completed runs */}
           {(() => {
             const completedCount = runs.filter((r) => r.status === 'completed').length;
@@ -159,6 +161,12 @@ export function ExperimentDetail() {
               </div>
             );
           })()}
+            <button
+              onClick={() => setIsInvestigatorOpen(true)}
+              className="px-3 py-2 text-sm font-medium text-purple-600 border border-purple-200 bg-purple-50 rounded hover:bg-purple-100 flex items-center gap-1.5 transition-colors shadow-sm"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> AI Investigator
+            </button>
           {experiment.status === 'draft' && (
             <button
               onClick={handleActivate}
@@ -194,7 +202,7 @@ export function ExperimentDetail() {
 
       {/* Tactile, Mobile-First Interactive Tab Buttons */}
       <div className="mb-8">
-        <div className="flex flex-wrap sm:inline-flex items-center gap-2 p-2 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl w-full sm:w-auto">
+        <div className="flex items-center gap-2 p-2 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl w-full overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const isAI = tab.id === 'ai-strategy';
@@ -202,7 +210,7 @@ export function ExperimentDetail() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2.5 py-2.5 px-5 rounded-xl text-sm sm:text-base font-bold transition-all duration-200 whitespace-nowrap select-none cursor-pointer ${
+                className={`shrink-0 flex items-center justify-center gap-2.5 py-2.5 px-5 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap select-none cursor-pointer ${
                   isActive
                     ? isAI
                       ? 'bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-600 text-white shadow-md border border-indigo-300/40'
@@ -323,6 +331,12 @@ export function ExperimentDetail() {
         onClose={() => setIsCompareOpen(false)}
         experimentId={id!}
         runs={runs}
+      />
+
+      <InvestigatorModal
+        isOpen={isInvestigatorOpen}
+        onClose={() => setIsInvestigatorOpen(false)}
+        experimentId={id!}
       />
 
       {/* Create Run Modal */}

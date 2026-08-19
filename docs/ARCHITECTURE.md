@@ -161,6 +161,7 @@ Calculates global feature importance using SHAP after a model completes training
 ## ai/
 
 Handles direct interaction with the Google Gemini API, including deterministic caching (SHA-256), resilience patterns (exponential backoff, multi-model fallback), and LLM-as-a-judge evaluation (RAGAS style).
+Contains the `InvestigatorAgent` and its read-only tool suite (implemented in `tools/`) for dynamic ML experiment investigation using native Gemini function calling.
 
 ---
 

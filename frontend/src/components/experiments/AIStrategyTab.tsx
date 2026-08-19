@@ -56,19 +56,22 @@ function parseBestRunInfo(strongestModel: string | undefined): { title: string; 
   if (!strongestModel || strongestModel === 'N/A' || strongestModel === 'None') {
     return { title: 'No champion yet', subtitle: 'Awaiting run evaluations' };
   }
-  // Example pattern: "Run #2 (XGBoost) - 0.9600 accuracy" or "Run #1 - Random Forest - 81.3%"
   const matchRun = strongestModel.match(/(Run\s*#?\s*\d+)/i);
   if (matchRun) {
     const title = matchRun[1];
     let remainder = strongestModel.replace(matchRun[1], '').replace(/^[-(:]+|[-):]+$/g, '').trim();
-    // Reformat decimals to percentages if suitable (e.g. 0.9600 -> 96.0%)
+    remainder = remainder.replace(/random_forest/i, 'Random Forest').replace(/logistic_regression/i, 'Logistic Regression').replace(/xgboost/i, 'XGBoost');
+    remainder = remainder.replace(/\s*with parameters\s*\{[^}]+\}/i, '');
     remainder = remainder.replace(/\b0\.(\d{2,4})\b/g, (m) => {
       const val = parseFloat(m) * 100;
       return `${val.toFixed(1)}%`;
     });
+    if (remainder.length > 55) remainder = remainder.substring(0, 52) + '...';
     return { title, subtitle: remainder || 'Top performing metric' };
   }
-  return { title: strongestModel.slice(0, 24), subtitle: 'Current top configuration' };
+  let sub = strongestModel.replace(/random_forest/i, 'Random Forest').replace(/logistic_regression/i, 'Logistic Regression').replace(/xgboost/i, 'XGBoost').replace(/\s*with parameters\s*\{[^}]+\}/i, '');
+  if (sub.length > 55) sub = sub.substring(0, 52) + '...';
+  return { title: 'Best Run', subtitle: sub };
 }
 
 function cleanListItem(item: string, maxLen = 85): string {
@@ -140,7 +143,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
         </p>
         <button
           onClick={fetchStrategy}
-          className="inline-flex items-center gap-2.5 rounded-xl bg-[var(--color-accent-purple)] px-8 py-3.5 text-sm font-extrabold text-[var(--color-text-primary)] hover:from-indigo-500 hover:to-purple-500 transition-all duration-200 shadow-xl shadow-indigo-500/30 cursor-pointer"
+          className="inline-flex items-center gap-2.5 rounded-xl bg-indigo-100 px-8 py-3.5 text-sm font-extrabold text-indigo-700 hover:bg-indigo-200 transition-all duration-200 shadow-xl shadow-indigo-500/30 cursor-pointer"
         >
           <Sparkles size={18} />
           Generate Experiment Strategy
@@ -178,13 +181,13 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
   const getConfidenceBadge = (c: string) => {
     switch (c.toLowerCase()) {
       case 'high': 
-        return { dot: '🟢', text: 'High', class: 'text-emerald-300 bg-emerald-500/20 border-emerald-400/40' };
+        return { dot: '•', text: 'High', class: 'text-emerald-700 bg-emerald-100 border-emerald-300' };
       case 'medium': 
-        return { dot: '🟡', text: 'Medium', class: 'text-amber-300 bg-amber-500/20 border-amber-400/40' };
+        return { dot: '•', text: 'Medium', class: 'text-amber-700 bg-amber-100 border-amber-300' };
       case 'low': 
-        return { dot: '🔴', text: 'Low', class: 'text-rose-300 bg-rose-500/20 border-rose-400/40' };
+        return { dot: '•', text: 'Low', class: 'text-rose-700 bg-rose-100 border-rose-300' };
       default: 
-        return { dot: '🔵', text: c, class: 'text-indigo-300 bg-indigo-500/20 border-indigo-400/40' };
+        return { dot: '•', text: c, class: 'text-indigo-700 bg-indigo-100 border-indigo-300' };
     }
   };
   const conf = getConfidenceBadge(confidence);
@@ -193,7 +196,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
                       strategy.current_experiment_status.toLowerCase().includes('plateau') ||
                       rec.action?.toLowerCase().includes('stop') || rec.action?.toLowerCase().includes('terminat');
 
-  const statusTitle = isPlateaued ? '🟡 Model has likely plateaued.' : '🟢 Experiment is progressing well.';
+  const statusTitle = isPlateaued ? '[Plateau] Model has likely plateaued.' : '[Active] Experiment is progressing well.';
   const statusSummary = getShortSentence(strategy.overall_assessment);
 
   const bestRun = parseBestRunInfo(strategy.strongest_model);
@@ -242,19 +245,19 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
       </div>
 
       {/* ── Hero Recommendation Card ───────────────────────────────────────── */}
-      <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-500/15 via-purple-500/10 to-transparent p-6 sm:p-8 shadow-2xl relative">
+      <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-100 via-purple-50 to-transparent p-6 sm:p-8 relative">
         <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-6">
           <div className="space-y-3 flex-1">
-            <span className="text-xs font-black tracking-widest uppercase text-indigo-300 block bg-indigo-500/20 px-2.5 py-1 rounded-md border border-indigo-400/30 w-fit">
+            <span className="text-xs font-black tracking-widest uppercase text-indigo-700 block bg-indigo-100 px-2.5 py-1 rounded-md border border-indigo-200 w-fit">
               Recommendation
             </span>
             <h3 className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)] tracking-tight leading-snug">
-              Next experiment: <span className="text-indigo-100 font-medium">{rec.action || 'Evaluate alternative estimator baselines.'}</span>
+              Next experiment: <span className="text-indigo-700 font-medium">{rec.action || 'Evaluate alternative estimator baselines.'}</span>
             </h3>
           </div>
 
           {/* Confidence & Reason Block (High Contrast, Larger Font) */}
-          <div className="shrink-0 bg-black/50 border border-[var(--color-border)] rounded-xl p-5 max-w-md space-y-2.5 shadow-inner">
+          <div className="shrink-0 bg-white/60 border border-[var(--color-border)] rounded-xl p-5 max-w-md space-y-2.5 shadow-inner">
             <div className="flex items-center justify-between gap-4 text-sm font-bold">
               <span className="text-[var(--color-text-muted)] uppercase tracking-wider text-xs">Confidence:</span>
               <span className={`px-3 py-1 rounded-full border text-xs sm:text-sm font-extrabold inline-flex items-center gap-1.5 shadow-sm ${conf.class}`}>
@@ -276,7 +279,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
           </span>
           <div className="flex flex-wrap items-center gap-2.5">
             {rec.model_type && (
-              <span className="bg-[var(--color-accent-purple)] text-[var(--color-text-primary)] border border-indigo-400/40 px-3.5 py-1.5 rounded-xl text-sm font-mono font-extrabold shadow-md">
+              <span className="bg-indigo-100 text-indigo-700 border border-indigo-300 px-3.5 py-1.5 rounded-xl text-sm font-mono font-extrabold shadow-md">
                 Model: {rec.model_type}
               </span>
             )}
@@ -298,27 +301,25 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-2">
         
         {/* 1. Best Run */}
-        <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] hover:border-indigo-400/40 transition-all shadow-md group">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-5 flex flex-col justify-between hover:bg-white/40 hover:border-indigo-400/40 transition-all shadow-md group">
           <div className="space-y-2">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block flex items-center gap-2">
-              🏆 Current Best Run
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block flex items-center gap-2"> Current Best Run
             </span>
             <div className="text-xl font-extrabold text-[var(--color-text-primary)] tracking-tight">{bestRun.title}</div>
-            <div className="text-xs sm:text-sm text-emerald-300 font-semibold mt-1 truncate" title={bestRun.subtitle}>
+            <div className="text-xs sm:text-sm text-[var(--color-text-secondary)] font-semibold mt-1 line-clamp-3" title={bestRun.subtitle}>
               {bestRun.subtitle}
             </div>
           </div>
-          <div className="mt-5 pt-3 border-t border-[var(--color-border)] flex items-center justify-end text-sm font-bold text-[var(--color-text-muted)] group-hover:text-indigo-300 transition-colors cursor-pointer" title="Switch to Runs tab to inspect">
+          <div onClick={() => { const btns = Array.from(document.querySelectorAll('button')); const btn = btns.find(b => b.textContent?.includes('Runs')); if (btn) btn.click(); }} className="mt-5 pt-3 border-t border-[var(--color-border)] flex items-center justify-end text-sm font-bold text-[var(--color-text-muted)] hover:text-indigo-500 transition-colors cursor-pointer" title="Switch to Runs tab to inspect">
             <span>View in Runs tab</span>
             <ArrowRight size={15} className="ml-1" />
           </div>
         </div>
 
         {/* 2. Trend */}
-        <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-5 flex flex-col justify-between hover:bg-white/40 transition-all shadow-md">
           <div className="space-y-2">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block flex items-center gap-2">
-              📈 Trend
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block flex items-center gap-2"> Trend
             </span>
             <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed font-medium mt-1">
               {punchyTrend}
@@ -326,7 +327,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
           </div>
           {isPlateaued ? (
             <div className="mt-4 pt-3 border-t border-[var(--color-border)] text-xs sm:text-sm font-bold text-amber-400 flex items-center gap-1.5">
-              <span>⚠️ Diminishing returns reached</span>
+              <span> Diminishing returns reached</span>
             </div>
           ) : (
             <div className="mt-4 pt-3 border-t border-[var(--color-border)] text-xs sm:text-sm font-bold text-emerald-400 flex items-center gap-1.5">
@@ -336,16 +337,15 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
         </div>
 
         {/* 3. Insights */}
-        <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-5 flex flex-col justify-between hover:bg-white/40 transition-all shadow-md">
           <div>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex items-center gap-2">
-              ⚡ Insights
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex items-center gap-2"> Insights
             </span>
             <ul className="space-y-2.5 text-xs sm:text-sm text-[var(--color-text-secondary)] font-medium">
               {punchyInsights.length > 0 ? (
                 punchyInsights.map((ins, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="text-emerald-400 font-bold shrink-0 text-sm">✓</span>
+                    <span className="text-emerald-600 font-bold shrink-0 text-sm">»</span>
                     <span className="leading-snug text-[var(--color-text-secondary)]" title={ins}>{ins}</span>
                   </li>
                 ))
@@ -357,16 +357,15 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
         </div>
 
         {/* 4. Not Yet Explored */}
-        <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-5 flex flex-col justify-between hover:bg-white/40 transition-all shadow-md">
           <div>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex items-center gap-2">
-              🔍 Not Yet Explored
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex items-center gap-2"> Not Yet Explored
             </span>
             <ul className="space-y-2.5 text-xs sm:text-sm text-[var(--color-text-secondary)] font-medium">
               {punchyUnexplored.length > 0 ? (
                 punchyUnexplored.map((ux, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="text-indigo-400 font-mono font-black shrink-0 text-sm">□</span>
+                    <span className="text-indigo-600 font-mono font-black shrink-0 text-sm">-</span>
                     <span className="leading-snug text-[var(--color-text-secondary)]" title={ux}>{ux}</span>
                   </li>
                 ))
@@ -383,7 +382,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
       <div className="flex justify-center pt-6">
         <button
           onClick={() => setShowFullAnalysis(!showFullAnalysis)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] text-sm font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-white/15 transition-all shadow-lg cursor-pointer"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] text-sm font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-gray-100 transition-all shadow-lg cursor-pointer"
         >
           <span>{showFullAnalysis ? 'Hide Full Analysis' : 'Show Full Analysis'}</span>
           {showFullAnalysis ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -401,7 +400,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Full Trajectory & Stability Analysis */}
-            <div className="rounded-2xl border border-[var(--color-border)] bg-black/40 p-6 space-y-5 shadow-lg">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-5 shadow-lg">
               <h4 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2.5 border-b border-[var(--color-border)] pb-3">
                 <TrendingUp size={18} className="text-blue-400" />
                 <span>Complete Trajectory & Stability</span>
@@ -447,7 +446,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
             </div>
 
             {/* Potential Risks & Empirical Evidence Sources */}
-            <div className="rounded-2xl border border-[var(--color-border)] bg-black/40 p-6 space-y-5 shadow-lg flex flex-col justify-between">
+            <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 space-y-5 shadow-lg flex flex-col justify-between">
               <div>
                 <h4 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2.5 border-b border-[var(--color-border)] pb-3 mb-4">
                   <AlertCircle size={18} className="text-rose-400" />
@@ -457,7 +456,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
                   {risksList.length > 0 ? (
                     risksList.map((risk, i) => (
                       <li key={i} className="flex items-start gap-3 leading-relaxed">
-                        <span className="text-rose-400 font-black shrink-0">•</span>
+                        <span className="text-rose-600 font-black shrink-0">!</span>
                         <span className="text-[var(--color-text-secondary)]">{risk}</span>
                       </li>
                     ))
@@ -469,8 +468,7 @@ export function AIStrategyTab({ experimentId }: AIStrategyTabProps) {
 
               {evidenceList.length > 0 && (
                 <div className="pt-5 mt-5 border-t border-[var(--color-border)]">
-                  <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider block mb-3">
-                    📊 Empirical Evidence Sources Utilized
+                  <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider block mb-3"> Empirical Evidence Sources Utilized
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {evidenceList.map((ev, idx) => (

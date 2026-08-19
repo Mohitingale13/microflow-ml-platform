@@ -85,8 +85,8 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
   if (isLoading && !analysis) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-3.5 bg-purple-500/15 border border-purple-500/30 rounded-2xl p-5 text-base text-purple-200 shadow-md">
-          <Sparkles className="text-purple-400 animate-spin shrink-0 w-6 h-6" />
+        <div className="flex items-center gap-3.5 bg-purple-500/15 border border-purple-500/30 rounded-2xl p-5 text-base text-purple-700 shadow-md">
+          <Sparkles className="text-purple-600 animate-spin shrink-0 w-6 h-6" />
           <span className="font-medium">Synthesizing developer intelligence from dataset schema and statistical distribution...</span>
         </div>
         <InsightsSkeleton />
@@ -97,9 +97,9 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
   // ── Initial Prompt State ──────────────────────────────────────────────────
   if (!analysis && !isLoading && !error) {
     return (
-      <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-transparent p-10 text-center shadow-lg max-w-3xl mx-auto my-6">
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/20 border border-purple-400/40 shadow-md">
-          <Sparkles className="text-purple-400 w-7 h-7" />
+      <div className="rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-transparent p-10 text-center shadow-md max-w-3xl mx-auto my-6">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 border border-purple-200 shadow-sm">
+          <Sparkles className="text-purple-600 w-7 h-7" />
         </div>
         <h3 className="text-lg font-extrabold text-[var(--color-text-primary)] mb-2 uppercase tracking-wider">AI Dataset Intelligence Audit</h3>
         <p className="text-sm text-[var(--color-text-muted)] mb-8 max-w-xl mx-auto leading-relaxed font-medium">
@@ -107,7 +107,7 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
         </p>
         <button
           onClick={fetchInsights}
-          className="inline-flex items-center gap-2.5 rounded-xl bg-[var(--color-accent-purple)] px-8 py-3.5 text-sm font-extrabold text-[var(--color-text-primary)] hover:from-purple-500 hover:to-blue-500 transition-all duration-200 shadow-xl shadow-purple-500/30 cursor-pointer"
+          className="inline-flex items-center gap-2.5 rounded-xl bg-purple-600 px-8 py-3.5 text-sm font-extrabold text-white hover:bg-purple-700 transition-all duration-200 shadow-md shadow-purple-600/20 cursor-pointer"
         >
           <Sparkles size={18} />
           Generate Dataset Intelligence
@@ -172,7 +172,7 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
       {/* ── Top Bar: Title & Refresh ───────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2.5">
-          <Sparkles className="w-5 h-5 text-purple-400 shrink-0" />
+          <Sparkles className="w-5 h-5 text-purple-600 shrink-0" />
           <h2 className="text-base font-bold text-[var(--color-text-primary)] tracking-wide uppercase">AI Dataset Intelligence</h2>
         </div>
         <button
@@ -186,7 +186,7 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
       </div>
 
       {/* ── Status Banner (High Contrast) ──────────────────────────────────── */}
-      <div className="bg-white/[0.05] border border-[var(--color-border)] rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-3.5 shadow-md">
+      <div className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-3.5 shadow-md">
         <span className="font-extrabold text-base text-[var(--color-text-primary)] whitespace-nowrap shrink-0 flex items-center gap-2">
           {statusTitle}
         </span>
@@ -196,27 +196,27 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
       </div>
 
       {/* ── Hero Developer Recommendation Card ──────────────────────────────── */}
-      <div className="rounded-2xl border border-purple-500/40 bg-gradient-to-br from-purple-500/15 via-blue-500/10 to-transparent p-6 sm:p-8 shadow-2xl relative">
+      <div className="rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 via-blue-50 to-transparent p-6 sm:p-8 relative shadow-md">
         <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-6">
           <div className="space-y-3 flex-1">
-            <span className="text-xs font-black tracking-widest uppercase text-purple-300 block bg-purple-500/20 px-2.5 py-1 rounded-md border border-purple-400/30 w-fit">
+            <span className="text-xs font-black tracking-widest uppercase text-purple-700 block bg-purple-100 px-2.5 py-1 rounded-md border border-purple-200 w-fit">
               Recommended Blueprint
             </span>
             <h3 className="text-xl sm:text-2xl font-bold text-[var(--color-text-primary)] tracking-tight leading-snug">
-              Target Column: <span className="text-purple-200 font-extrabold underline decoration-purple-400/50">{analysis.recommended_target}</span>
+              Target Column: <span className="text-purple-700 font-extrabold underline decoration-purple-300">{analysis.recommended_target}</span>
             </h3>
             <p className="text-sm sm:text-base text-[var(--color-text-secondary)] font-medium pt-1 max-w-2xl leading-relaxed">
-              Start prototyping baseline experiments with <span className="text-emerald-300 font-bold">{topModel.model}</span>. {topModel.reasoning}
+              Start prototyping baseline experiments with <span className="text-emerald-700 font-bold">{topModel.model}</span>. {topModel.reasoning}
             </p>
           </div>
 
           {/* Target Rationale Block */}
-          <div className="shrink-0 bg-black/50 border border-[var(--color-border)] rounded-xl p-5 max-w-md space-y-2.5 shadow-inner">
+          <div className="shrink-0 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl p-5 max-w-md space-y-2.5 shadow-md">
             <div className="flex items-center justify-between gap-4 text-sm font-bold border-b border-[var(--color-border)] pb-2">
               <span className="text-[var(--color-text-muted)] uppercase tracking-wider text-xs flex items-center gap-1.5">
-                <Target size={14} className="text-purple-400" /> Target Grounding:
+                <Target size={14} className="text-purple-600" /> Target Grounding:
               </span>
-              <span className="text-purple-300 font-mono font-extrabold text-xs bg-purple-500/20 px-2.5 py-0.5 rounded border border-purple-400/30">
+              <span className="text-purple-700 font-mono font-extrabold text-xs bg-purple-100 px-2.5 py-0.5 rounded border border-purple-300">
                 Primary Label
               </span>
             </div>
@@ -230,7 +230,7 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
         {/* Suggested Model Family Bar */}
         <div className="mt-8 pt-5 border-t border-[var(--color-border)] flex flex-col md:flex-row md:items-center gap-4">
           <span className="text-sm font-bold text-[var(--color-text-secondary)] flex items-center gap-2 shrink-0 uppercase tracking-wider">
-            <Layers size={15} className="text-purple-400" /> Suitable Model Families:
+            <Layers size={15} className="text-purple-600" /> Suitable Model Families:
           </span>
           <div className="flex flex-wrap items-center gap-2.5">
             {modelsList.map((mod, idx) => {
@@ -238,11 +238,11 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
               const isTop = idx === 0 || suitability === 'high';
               return (
                 <span key={idx} className={`border px-3.5 py-1.5 rounded-xl text-sm font-mono font-medium shadow-sm flex items-center gap-2 ${
-                  isTop ? 'bg-purple-500/20 border-purple-400/50 text-[var(--color-text-primary)] font-extrabold' : 'bg-[var(--color-surface-2)] border-[var(--color-border)] text-[var(--color-text-muted)]'
+                  isTop ? 'bg-purple-100 border-purple-300 text-purple-900 font-extrabold' : 'bg-[var(--color-surface-2)] border-[var(--color-border)] text-[var(--color-text-muted)]'
                 }`}>
                   <span>{mod.model}</span>
                   <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
-                    suitability === 'high' ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-400/40' : 'bg-blue-500/20 text-blue-300'
+                    suitability === 'high' ? 'bg-emerald-500/30 text-emerald-700 border border-emerald-400/40' : 'bg-blue-100 text-blue-700'
                   }`}>
                     {mod.suitability || 'Viable'}
                   </span>
@@ -260,18 +260,18 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
         <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+              <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider flex items-center gap-2">
                 📊 Data Quality
               </span>
               <span className={`text-xs font-black px-2.5 py-0.5 rounded-md uppercase border ${
-                isHealthy ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40' : 'bg-amber-500/20 text-amber-300 border-amber-400/40'
+                isHealthy ? 'bg-emerald-500/20 text-emerald-700 border-emerald-400/40' : 'bg-amber-500/20 text-amber-300 border-amber-400/40'
               }`}>
                 {qualityLabel}
               </span>
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-extrabold text-[var(--color-text-primary)] tracking-tight">{qualityScore}</span>
-              <span className="text-gray-400 font-semibold text-sm">/ 100</span>
+              <span className="text-[var(--color-text-muted)] font-semibold text-sm">/ 100</span>
             </div>
             <p className="text-xs sm:text-sm text-[var(--color-text-muted)] font-medium leading-relaxed mt-2 line-clamp-3">
               {quality.explanation || 'Analyzed missing ratio, sample volume adequacy, and features.'}
@@ -282,19 +282,19 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
         {/* 2. Key Data Strengths */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
           <div>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex items-center gap-2">
+            <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider block mb-3 flex items-center gap-2">
               ✓ Data Strengths
             </span>
             <ul className="space-y-2.5 text-xs sm:text-sm text-[var(--color-text-secondary)] font-medium">
               {punchyStrengths.length > 0 ? (
                 punchyStrengths.map((str, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="text-emerald-400 font-black shrink-0 text-sm">✓</span>
+                    <span className="text-emerald-600 font-black shrink-0 text-sm">✓</span>
                     <span className="leading-snug text-[var(--color-text-secondary)]" title={str}>{str}</span>
                   </li>
                 ))
               ) : (
-                <li className="text-sm text-gray-400 italic">No structural strengths listed.</li>
+                <li className="text-sm text-[var(--color-text-muted)] italic">No structural strengths listed.</li>
               )}
             </ul>
           </div>
@@ -303,19 +303,19 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
         {/* 3. Preprocessing Actions */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
           <div>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex items-center gap-2">
+            <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider block mb-3 flex items-center gap-2">
               ⚡ Preprocessing Needs
             </span>
             <ul className="space-y-2.5 text-xs sm:text-sm text-[var(--color-text-secondary)] font-medium">
               {punchyPrep.length > 0 ? (
                 punchyPrep.map((prep, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="text-purple-400 font-mono font-black shrink-0 text-sm">□</span>
+                    <span className="text-purple-600 font-mono font-black shrink-0 text-sm">□</span>
                     <span className="leading-snug text-[var(--color-text-secondary)]" title={prep}>{prep}</span>
                   </li>
                 ))
               ) : (
-                <li className="text-sm text-emerald-300 font-semibold flex items-center gap-2">
+                <li className="text-sm text-emerald-700 font-semibold flex items-center gap-2">
                   <CheckCircle2 size={16} /> Ready without transforms
                 </li>
               )}
@@ -326,20 +326,20 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
         {/* 4. Risk Alerts / Leakage Warnings */}
         <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.04] p-5 flex flex-col justify-between hover:bg-white/[0.07] transition-all shadow-md">
           <div>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-3 flex items-center gap-2">
+            <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider block mb-3 flex items-center gap-2">
               ⚠️ Risks & Leakage
             </span>
             <ul className="space-y-2.5 text-xs sm:text-sm text-[var(--color-text-secondary)] font-medium">
               {punchyIssues.length > 0 ? (
                 punchyIssues.map((iss, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="text-amber-400 font-bold shrink-0 text-sm">!</span>
+                    <span className="text-amber-600 font-bold shrink-0 text-sm">!</span>
                     <span className="leading-snug text-[var(--color-text-secondary)]" title={iss}>{iss}</span>
                   </li>
                 ))
               ) : (
-                <li className="text-sm text-emerald-300 font-semibold flex items-center gap-2">
-                  <ShieldAlert size={16} className="text-emerald-400" /> No data leakage detected
+                <li className="text-sm text-emerald-700 font-semibold flex items-center gap-2">
+                  <ShieldAlert size={16} className="text-emerald-600" /> No data leakage detected
                 </li>
               )}
             </ul>
@@ -363,7 +363,7 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
       {showFullProfile && (
         <div className="mt-8 space-y-6 pt-8 border-t border-[var(--color-border)] animate-in slide-in-from-top-2 duration-200">
           <div className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-2">
-            <BarChart2 size={18} className="text-purple-400" /> Complete Statistical & Feature Audit
+            <BarChart2 size={18} className="text-purple-600" /> Complete Statistical & Feature Audit
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -376,11 +376,11 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
                 {analysis.overall_summary}
               </p>
               <div className="pt-4 border-t border-[var(--color-border)]">
-                <span className="text-gray-400 font-bold block mb-2 uppercase text-xs tracking-wider">Recommended Next Steps:</span>
+                <span className="text-[var(--color-text-muted)] font-bold block mb-2 uppercase text-xs tracking-wider">Recommended Next Steps:</span>
                 <ul className="space-y-2 text-sm text-[var(--color-text-secondary)] font-medium">
                   {nextStepsList.map((step, i) => (
                     <li key={i} className="flex items-start gap-2.5">
-                      <span className="text-purple-400 font-black">•</span>
+                      <span className="text-purple-600 font-black">•</span>
                       <span>{step}</span>
                     </li>
                   ))}
@@ -404,7 +404,7 @@ export function AIInsightsTab({ datasetId }: AIInsightsTabProps) {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-400 italic">No specific anomalies flagged per individual column.</p>
+                  <p className="text-sm text-[var(--color-text-muted)] italic">No specific anomalies flagged per individual column.</p>
                 )}
               </div>
             </div>

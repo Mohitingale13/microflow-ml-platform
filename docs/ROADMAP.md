@@ -57,7 +57,7 @@ AI agents must implement only one milestone at a time.
 
 ## Milestone 9: Polish & AI Integration
 **Objective:** Prepare project for production showcase and integrate LLMs.
-**Deliverables:** Gemini AI Engineering Suite (Hybrid RAG, Run Review, Dataset Intel), SHAP Explainability, Documentation, Demo.
+**Deliverables:** Gemini AI Engineering Suite (Hybrid RAG, Run Review, Dataset Intel), Experiment Investigator Agent, SHAP Explainability, Documentation, Demo.
 
 ---
 
@@ -66,8 +66,6 @@ AI agents must implement only one milestone at a time.
 These issues exist in the current codebase and should be fixed in upcoming refactoring cycles:
 
 - **Synchronous Training Execution:** Model training blocks the FastAPI thread synchronously. This needs to be migrated to asynchronous background tasks to prevent timeouts on large datasets.
-- **AI Evaluation Retry Loop:** The `ai_evaluation_service.py` batch processor swallows Gemini API exceptions without marking queries as `failed`, risking infinite retry loops on poison pill queries.
-- **Database Migrations:** The project relies on `Base.metadata.create_all` for database initialization. Alembic must be introduced to manage future schema changes.
 
 ---
 

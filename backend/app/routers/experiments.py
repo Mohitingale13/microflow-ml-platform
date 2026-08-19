@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.deps import get_db
@@ -14,6 +14,7 @@ from app.schemas.experiment import (
     ExperimentUpdate,
     RunListItem,
 )
+from app.schemas.investigator import InvestigateRequest
 from app.services.experiment_service import ExperimentService
 from app.utils.response import ApiResponse
 
@@ -29,7 +30,7 @@ def get_experiment_service() -> ExperimentService:
     )
 
 
-# ── Collection endpoints ───────────────────────────────────────────────────────
+# ─── Collection endpoints ────────────────────────────────────────────────────
 
 @router.get("", response_model=ApiResponse)
 def list_experiments(
@@ -65,7 +66,7 @@ def create_experiment(
     )
 
 
-# ── Item endpoints ─────────────────────────────────────────────────────────────
+# ─── Item endpoints ──────────────────────────────────────────────────────────
 
 @router.get("/{experiment_id}", response_model=ApiResponse)
 def get_experiment(
@@ -105,7 +106,7 @@ def delete_experiment(
     return ApiResponse.ok(message="Experiment deleted successfully")
 
 
-# ── Nested runs ────────────────────────────────────────────────────────────────
+# ─── Nested runs ─────────────────────────────────────────────────────────────
 
 @router.get("/{experiment_id}/runs", response_model=ApiResponse)
 def list_experiment_runs(
@@ -122,7 +123,7 @@ def list_experiment_runs(
     return ApiResponse.ok(data=items, message=f"{len(items)} run(s) found")
 
 
-# ── AI Experiment Strategy ─────────────────────────────────────────────────────
+# ─── AI Experiment Strategy ──────────────────────────────────────────────────
 
 
 @router.post("/{experiment_id}/strategy", response_model=ApiResponse)
@@ -137,4 +138,34 @@ def generate_experiment_strategy(
     return ApiResponse.ok(
         data=strategy.model_dump(mode="json"),
         message="AI Experiment Strategy generated successfully" if not strategy.cached else "Cached experiment strategy retrieved.",
+    )
+
+
+# ─── AI Experiment Investigator ──────────────────────────────────────────────
+
+
+@router.post("/{experiment_id}/investigate", response_model=ApiResponse)
+def investigate_experiment(
+    experiment_id: str,
+    payload: InvestigateRequest,
+    db: Session = Depends(get_db),
+) -> ApiResponse:
+    """Execute bounded, read-only Agentic ML investigation over experiment data."""
+    from app.services.investigator_service import InvestigatorService
+
+    if not payload.objective or not payload.objective.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Investigation objective cannot be empty",
+        )
+
+    service = InvestigatorService()
+    result = service.investigate_experiment(
+        experiment_id=experiment_id,
+        objective=payload.objective.strip(),
+        db=db,
+    )
+    return ApiResponse.ok(
+        data=result.model_dump(mode="json"),
+        message="Investigation completed successfully",
     )

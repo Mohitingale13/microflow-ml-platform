@@ -58,7 +58,8 @@ The platform is aimed at ML engineers, data scientists, and research engineers w
 - Complete AI Engineering Suite powered by Google Gemini 3.6 Flash
 - Automatic exponential backoff & multi-model fallback for AI resilience
 - SHA-256 deterministic caching for all AI responses
-- LLM-as-a-Judge Evaluation Layer (RAGAS) mathematically measuring AI hallucination
+- LLM-as-a-Judge Evaluation Layer (RAGAS) with intelligent retry and state tracking
+- Experiment Investigator — Bounded Agentic ML Investigation Suite
 - Global Feature Importance via SHAP integration for all models
 - Paginated Artifact Registry with latest-first ordering
 - Uniform refresh UX with 500 ms minimum spinner + confirmation badge
@@ -181,7 +182,7 @@ Structured Retrieval          Semantic Retrieval
 
 - **Dual-Retrieval Pipeline**: Combines structured database SQL queries with pgvector semantic similarity search (`<=>` cosine distance) over unstructured engineering narratives.
 - **Sources Attribution**: Displays an interactive **"Sources Used"** drawer in the UI allowing users to inspect matched semantic knowledge snippets.
-- **RAG Evaluation Layer (RAGAS)**: An automated evaluation service that rigorously grades the assistant's responses across three metrics (Context Relevance, Faithfulness, and Answer Relevance) to mathematically prove the absence of hallucination.
+- **RAG Evaluation Layer (RAGAS)**: An automated evaluation service that rigorously grades the assistant's responses across three metrics (Context Relevance, Faithfulness, and Answer Relevance). It includes a robust retry state machine (transitions from `pending` to `pending + retry` to `failed` up to 3 times) to isolate failures and accurately manage evaluation batches.
 
 Every response delivers five structured fields:
 | Field | Description |
@@ -219,6 +220,14 @@ Deep analysis comparing any two completed runs within an experiment:
 - Configuration attribution — which hyperparameter changes drove metric differences
 - Explicit trade-off analysis (accuracy vs. speed vs. generalization)
 - Actionable improvement strategies with specific parameter suggestions
+
+#### 6. Experiment Investigator
+An agentic investigation suite that operates over existing experiment data.
+- **Bounded execution**: Operates with a hard-capped `MAX_AGENT_ITERATIONS = 5` limit.
+- **Strictly read-only**: Uses exactly 5 explicitly exposed tools (`get_experiment_runs`, `get_run_config`, `get_run_metrics`, `compare_runs`, `get_feature_importance`). The agent cannot modify experiments, models, or database state.
+- **Dynamic Selection**: Utilizes native Gemini function calling to decide which tools to execute based on the user's natural language objective.
+- **Request-Scoped**: The agent maintains state only for the duration of the request, with no persistent memory or arbitrary SQL generation.
+- **Structured Output**: Produces a structured, evidence-backed `InvestigationReport` detailing conclusions, evidence, recommendations, and limitations.
 
 ### Training Engine & SHAP Explainability
 - Supports three model families: **Random Forest**, **Logistic Regression**, **XGBoost**
@@ -521,15 +530,16 @@ All server state on the frontend is managed by TanStack Query. This provides aut
 
 ## Contributing
 
-Issues and pull requests are welcome.
+We welcome contributions from the open-source community! 
 
-**Before opening a PR:**
-- Run `pytest -v` and ensure all tests pass
-- Follow the existing layer conventions: routers call services, services call repositories
-- Do not add business logic to routers
-- Do not add HTTP calls to the training engine
-- Do not add database access to the AI layer — pass pre-fetched data objects
-- Add tests for any new service or repository method
+Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on how to set up your development environment, run tests, and submit pull requests.
+
+### Before opening a PR:
+- Run `pytest -v` and ensure all tests pass.
+- Follow the existing layer conventions: routers call services, services call repositories.
+- Keep business logic in services (not routers), and never add database access to the AI layer.
+- Ensure any new UI components are responsive and mobile-first.
+- Add tests for any new service or repository method.
 
 ---
 

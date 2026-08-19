@@ -83,20 +83,20 @@ function MetricRow({ d, isTime }: { d: MetricDelta; isTime: boolean }) {
 
   const colorClass =
     isPositive === null
-      ? 'text-text-muted'
+      ? 'text-[var(--color-text-muted)]'
       : isPositive
-      ? 'text-emerald-400'
+      ? 'text-emerald-600'
       : 'text-red-400';
 
   return (
-    <tr className="border-b border-border/50 last:border-0">
-      <td className="py-2.5 pr-4 text-xs text-text-muted font-medium whitespace-nowrap">
+    <tr className="border-b border-[var(--color-border)]/50 last:border-0">
+      <td className="py-2.5 pr-4 text-xs text-[var(--color-text-muted)] font-medium whitespace-nowrap">
         {d.metric}
       </td>
-      <td className="py-2.5 pr-4 text-xs font-mono text-text-secondary text-center">
+      <td className="py-2.5 pr-4 text-xs font-mono text-[var(--color-text-secondary)] text-center">
         {formatMetricValue(d.run_a_value, d.metric)}
       </td>
-      <td className="py-2.5 pr-4 text-xs font-mono text-text-secondary text-center">
+      <td className="py-2.5 pr-4 text-xs font-mono text-[var(--color-text-secondary)] text-center">
         {formatMetricValue(d.run_b_value, d.metric)}
       </td>
       <td className={`py-2.5 text-xs font-mono font-semibold text-right ${colorClass}`}>
@@ -188,26 +188,26 @@ export function CompareRunsDialog({
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-3xl max-h-[90vh] bg-surface-dark border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <div className="relative w-full max-w-3xl max-h-[90vh] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-accent-blue/10 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-accent-blue" />
+            <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 id="compare-dialog-title" className="text-sm font-bold text-text-primary">
+              <h2 id="compare-dialog-title" className="text-sm font-bold text-[var(--color-text-primary)]">
                 AI Run Comparison
               </h2>
-              <p className="text-xs text-text-muted">
+              <p className="text-xs text-[var(--color-text-muted)]">
                 AI Powered · Select two completed runs
               </p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-2 transition-colors"
+            className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-2)] transition-colors"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
@@ -224,7 +224,7 @@ export function CompareRunsDialog({
               <div>
                 <label
                   htmlFor="run-a-select"
-                  className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5"
+                  className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5"
                 >
                   Run A — Baseline
                 </label>
@@ -234,7 +234,7 @@ export function CompareRunsDialog({
                     value={runAId}
                     onChange={(e) => setRunAId(e.target.value)}
                     disabled={isLoading}
-                    className="w-full appearance-none bg-surface border border-border text-text-primary text-sm rounded-lg px-3 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-colors disabled:opacity-50"
+                    className="w-full appearance-none bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-lg px-3 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-colors disabled:opacity-50"
                   >
                     <option value="">Select a completed run…</option>
                     {completedRuns.map((r) => (
@@ -243,7 +243,7 @@ export function CompareRunsDialog({
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                  <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                 </div>
               </div>
 
@@ -251,7 +251,7 @@ export function CompareRunsDialog({
               <div>
                 <label
                   htmlFor="run-b-select"
-                  className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5"
+                  className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5"
                 >
                   Run B — Challenger
                 </label>
@@ -261,7 +261,7 @@ export function CompareRunsDialog({
                     value={runBId}
                     onChange={(e) => setRunBId(e.target.value)}
                     disabled={isLoading}
-                    className="w-full appearance-none bg-surface border border-border text-text-primary text-sm rounded-lg px-3 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-colors disabled:opacity-50"
+                    className="w-full appearance-none bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-lg px-3 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-accent-blue/50 focus:border-accent-blue/50 transition-colors disabled:opacity-50"
                   >
                     <option value="">Select a completed run…</option>
                     {completedRuns.map((r) => (
@@ -270,7 +270,7 @@ export function CompareRunsDialog({
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
+                  <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                 </div>
               </div>
             </div>
@@ -315,7 +315,7 @@ export function CompareRunsDialog({
 
           {/* ── Results ── */}
           {result && (
-            <div className="space-y-6 animate-in fade-in duration-200 text-text-primary">
+            <div className="space-y-6 animate-in fade-in duration-200 text-[var(--color-text-primary)]">
               
               {/* Run pair header */}
               <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-[var(--color-border)]">
@@ -345,9 +345,9 @@ export function CompareRunsDialog({
                     {cleanCompareSentence(result.overall_summary, 190)}
                   </p>
                 </div>
-                <div className="shrink-0 bg-black/50 border border-[var(--color-border)] rounded-xl p-4 max-w-xs space-y-2 shadow-inner text-xs">
+                <div className="shrink-0 bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-xl p-4 max-w-xs space-y-2 shadow-inner text-xs">
                   <span className="font-bold text-[var(--color-text-primary)] uppercase text-[11px] tracking-wider block flex items-center gap-1.5">
-                    <Lightbulb size={13} className="text-indigo-400" /> Next Iteration Goal:
+                    <Lightbulb size={13} className="text-indigo-600" /> Next Iteration Goal:
                   </span>
                   <p className="text-[var(--color-text-secondary)] font-medium leading-relaxed">
                     {cleanCompareSentence(result.next_recommendation, 130)}
@@ -356,9 +356,9 @@ export function CompareRunsDialog({
               </div>
 
               {/* Metric Comparison Table */}
-              <div className="rounded-2xl border border-[var(--color-border)] bg-white/[0.03] p-5 shadow-md">
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-5 shadow-md">
                 <div className="flex items-center gap-2 mb-3 text-[var(--color-text-primary)] font-bold text-sm uppercase tracking-wider border-b border-[var(--color-border)] pb-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  <TrendingUp className="w-4 h-4 text-emerald-600" />
                   <span>Metric Differentials</span>
                 </div>
                 <div className="overflow-x-auto">
@@ -379,7 +379,7 @@ export function CompareRunsDialog({
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 font-medium">
+                    <tbody className="divide-y divide-[var(--color-border)] font-medium">
                       {result.metric_deltas.map((d) => (
                         <MetricRow
                           key={d.metric}
@@ -394,20 +394,20 @@ export function CompareRunsDialog({
 
               {/* 2-Column Concise Developer Pros/Cons Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="rounded-xl border border-[var(--color-border)] bg-white/[0.03] p-4 flex flex-col justify-between shadow-md hover:bg-white/[0.06] transition-all">
+                <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4 flex flex-col justify-between shadow-md hover:bg-gray-50 transition-all">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <TrendingUp className="w-4 h-4 text-emerald-400" /> Key Architectural Gains
+                    <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
+                      <TrendingUp className="w-4 h-4 text-emerald-600" /> Key Architectural Gains
                     </span>
                     <p className="text-xs sm:text-sm font-medium text-[var(--color-text-secondary)] leading-relaxed">
                       {cleanCompareSentence(result.key_improvements, 150)}
                     </p>
                   </div>
                 </div>
-                <div className="rounded-xl border border-[var(--color-border)] bg-white/[0.03] p-4 flex flex-col justify-between shadow-md hover:bg-white/[0.06] transition-all">
+                <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4 flex flex-col justify-between shadow-md hover:bg-gray-50 transition-all">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <AlertTriangle className="w-4 h-4 text-amber-400" /> Latency & Tradeoffs
+                    <span className="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 text-amber-600" /> Latency & Tradeoffs
                     </span>
                     <p className="text-xs sm:text-sm font-medium text-[var(--color-text-secondary)] leading-relaxed">
                       {cleanCompareSentence(result.tradeoffs, 150)}
@@ -429,27 +429,27 @@ export function CompareRunsDialog({
 
               {showFullComparison && (
                 <div className="pt-5 border-t border-[var(--color-border)] space-y-4 animate-in slide-in-from-top-2 duration-200 text-sm">
-                  <div className="bg-black/40 border border-[var(--color-border)] rounded-2xl p-5 space-y-4">
+                  <div className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-2xl p-5 space-y-4">
                     <div>
-                      <span className="text-xs font-extrabold uppercase text-gray-400 tracking-wider block mb-1">Full Executive Summary:</span>
+                      <span className="text-xs font-extrabold uppercase text-[var(--color-text-muted)] tracking-wider block mb-1">Full Executive Summary:</span>
                       <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.overall_summary}</p>
                     </div>
                     <div className="pt-3 border-t border-[var(--color-border)]">
-                      <span className="text-xs font-extrabold uppercase text-purple-300 tracking-wider block mb-1">Configuration Divergence Analysis:</span>
+                      <span className="text-xs font-extrabold uppercase text-purple-600 tracking-wider block mb-1">Configuration Divergence Analysis:</span>
                       <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.configuration_analysis}</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-[var(--color-border)]">
                       <div>
-                        <span className="text-xs font-extrabold uppercase text-emerald-400 tracking-wider block mb-1">Complete Improvements:</span>
+                        <span className="text-xs font-extrabold uppercase text-emerald-600 tracking-wider block mb-1">Complete Improvements:</span>
                         <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.key_improvements}</p>
                       </div>
                       <div>
-                        <span className="text-xs font-extrabold uppercase text-amber-400 tracking-wider block mb-1">Complete Tradeoffs:</span>
+                        <span className="text-xs font-extrabold uppercase text-amber-600 tracking-wider block mb-1">Complete Tradeoffs:</span>
                         <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.tradeoffs}</p>
                       </div>
                     </div>
                     <div className="pt-3 border-t border-[var(--color-border)]">
-                      <span className="text-xs font-extrabold uppercase text-blue-400 tracking-wider block mb-1">Next Step Strategy:</span>
+                      <span className="text-xs font-extrabold uppercase text-blue-600 tracking-wider block mb-1">Next Step Strategy:</span>
                       <p className="text-[var(--color-text-secondary)] leading-relaxed font-normal">{result.next_recommendation}</p>
                     </div>
                   </div>
@@ -460,13 +460,13 @@ export function CompareRunsDialog({
         </div>
 
         {/* ── Footer ── */}
-        <div className="px-6 py-3 border-t border-border bg-surface shrink-0 flex items-center justify-between">
-          <p className="text-[10px] text-text-muted">
+        <div className="px-6 py-3 border-t border-[var(--color-border)] bg-[var(--color-surface)] shrink-0 flex items-center justify-between">
+          <p className="text-[10px] text-[var(--color-text-muted)]">
             AI Powered Comparison
           </p>
           <button
             onClick={handleClose}
-            className="text-sm text-text-muted hover:text-text-primary transition-colors font-medium px-3 py-1.5 rounded-md hover:bg-surface-2"
+            className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors font-medium px-3 py-1.5 rounded-md hover:bg-[var(--color-surface-2)]"
           >
             Close
           </button>
