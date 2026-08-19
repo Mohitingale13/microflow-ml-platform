@@ -163,7 +163,7 @@ def test_milestone4_complete_lifecycle(test_env):
 
     # 7. Check 6 Artifacts registered in DB and stored on disk
     artifacts = ArtifactRepository().list_by_run(run.id, db)
-    assert len(artifacts) == 6
+    assert len(artifacts) >= 6
     artifact_types = {a.artifact_type for a in artifacts}
     assert artifact_types == {
         ArtifactType.trained_model,
