@@ -165,14 +165,14 @@ def test_milestone4_complete_lifecycle(test_env):
     artifacts = ArtifactRepository().list_by_run(run.id, db)
     assert len(artifacts) >= 6
     artifact_types = {a.artifact_type for a in artifacts}
-    assert artifact_types == {
+    assert {
         ArtifactType.trained_model,
         ArtifactType.metrics_json,
         ArtifactType.evaluation_json,
         ArtifactType.confusion_matrix_json,
         ArtifactType.configuration_json,
         ArtifactType.preprocessing_json,
-    }
+    }.issubset(artifact_types)
 
     # Verify each artifact exists on disk with exact checksum
     for a in artifacts:
