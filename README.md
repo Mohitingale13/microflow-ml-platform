@@ -7,7 +7,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.2-3178C6?style=flat&logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat&logo=postgresql&logoColor=white)
-![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI_Engine-4285F4?style=flat&logo=google&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-Primary_Model-4285F4?style=flat&logo=google&logoColor=white)
 ![Agentic AI](https://img.shields.io/badge/Agentic_AI-Autonomous_ML_Agent-FF3366?style=flat&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?style=flat&logo=docker&logoColor=white)
 <br>
@@ -27,6 +27,10 @@
 ![Demo Video](images/demo_video.webp)
 
 **A full-stack ML experimentation and observability platform powered by an Agentic AI engineering co-pilot.**
+
+> ### 🔬 Highlight: Experiment Investigator
+> Ask any question about your experiment. An autonomous AI agent — built on Gemini's native function calling — plans a multi-step investigation, executes read-only tools against live telemetry, and returns a structured report with evidence provenance. **Grounded in actual experiment telemetry. No hardcoded logic. A real agent loop.**
+> [↓ Jump to full details](#-experiment-investigator--agentic-ai-at-the-core)
 
 ---
 
@@ -222,3 +226,5 @@ MIT
 ## Acknowledgements
 
 Inspired by [MLflow](https://mlflow.org), [Weights & Biases](https://wandb.ai), and [Kubeflow](https://kubeflow.org). AI powered by [Google Gemini](https://deepmind.google/technologies/gemini/).
+
+
