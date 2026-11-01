@@ -7,7 +7,12 @@ from app.core.config import settings
 router = APIRouter(tags=["health"])
 
 
-@router.get("/health", response_model=ApiResponse)
+@router.api_route(
+    "/health",
+    methods=["GET", "HEAD"],
+    response_model=ApiResponse,
+    status_code=200,
+)
 def health_check() -> ApiResponse:
     payload = HealthResponse(
         service="microflow-backend",
